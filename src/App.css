@@ -1,11 +1,3 @@
-.logo.vite:hover {
-    filter: drop-shadow(0 0 2em #747bff);
-}
-
-.logo.solid:hover {
-    filter: drop-shadow(0 0 2em #2f5d90);
-}
-
 :root {
     font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
     font-size: 16px;
@@ -24,41 +16,90 @@
 
 .container {
     margin: 0;
-    padding-top: 10vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     text-align: center;
 }
 
-.logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: 0.75s;
+.header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 1rem;
 }
 
-.logo.tauri:hover {
-    filter: drop-shadow(0 0 2em #24c8db);
+.header-right {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
 }
 
-.row {
+.preview-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+
+    gap: 1rem;
+    padding-top: 2rem;
+}
+
+.preview-list>div {
+    margin: 5px;
+    padding: 10px;
+
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.preview-image {
+    width: 400px;
+    height: 200px;
+    object-fit: cover;
+    border: 8px solid transparent;
+    cursor: pointer;
+}
+
+#wallpaper-preview-selected {
+    border: 8px solid #224da5ff;
+}
+
+.wallpaper-preview-active {
+    border: 8px solid #229664ff;
+}
+
+.settings-container {
+    position: absolute;
+    inset: 0;
     display: flex;
     justify-content: center;
+    align-items: center;
 }
 
-a {
-    font-weight: 500;
-    color: #646cff;
-    text-decoration: inherit;
+.settings {
+    padding: 2rem;
+    background-color: #c8c8c8ff;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    width: 60%;
+    height: 40%;
 }
 
-a:hover {
-    color: #535bf2;
+.settings-close-btn {}
+
+.wallpaper-sources-list {
+    overflow-y: auto;
+    display: felx;
+    flex-direction: row;
+    gap: 2rem;
 }
 
-h1 {
-    text-align: center;
+.wallpaper-source-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
 
 input,
@@ -91,10 +132,6 @@ button:active {
 input,
 button {
     outline: none;
-}
-
-#greet-input {
-    margin-right: 5px;
 }
 
 @media (prefers-color-scheme: dark) {
