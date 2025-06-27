@@ -41,7 +41,7 @@
     padding-top: 2rem;
 }
 
-.preview-list > div {
+.preview-list>div {
     margin: 5px;
     padding: 10px;
     text-overflow: ellipsis;

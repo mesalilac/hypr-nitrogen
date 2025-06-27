@@ -7,46 +7,46 @@ import {
     Switch,
     Match,
     onCleanup,
-} from 'solid-js'
-import { open } from '@tauri-apps/plugin-dialog'
-import toast, { Toaster } from 'solid-toast'
-import { debounce } from '@solid-primitives/scheduled'
-import { convertFileSrc } from '@tauri-apps/api/core'
-import * as ipc from './ipc'
-import './App.css'
+} from 'solid-js';
+import { open } from '@tauri-apps/plugin-dialog';
+import toast, { Toaster } from 'solid-toast';
+import { debounce } from '@solid-primitives/scheduled';
+import { convertFileSrc } from '@tauri-apps/api/core';
+import * as ipc from './ipc';
+import './App.css';
 
 // TODO: Refactor
 
 function WallpaperSource(props: {
-    id: string
-    path: string
-    active: boolean
-    update_source_list_fn: (id: string) => void
+    id: string;
+    path: string;
+    active: boolean;
+    update_source_list_fn: (id: string) => void;
 }) {
-    const [active, setActive] = createSignal(props.active)
+    const [active, setActive] = createSignal(props.active);
 
     function handleCheckboxChange(v: boolean) {
-        setActive(v)
+        setActive(v);
         ipc.update_wallpaper_source_active({ id: props.id, active: active() })
             .then((res) => {
                 if (!res.ok && res.data) {
                 } else {
-                    toast.error(res.error?.details)
+                    toast.error(res.error?.details);
                 }
             })
-            .catch((e) => toast.error(e))
+            .catch((e) => toast.error(e));
     }
 
     function handleSourceRemove() {
         ipc.remove_wallpaper_source({ id: props.id })
             .then((res) => {
                 if (!res.ok && res.data) {
-                    props.update_source_list_fn(props.id)
+                    props.update_source_list_fn(props.id);
                 } else {
-                    toast.error(res.error?.details)
+                    toast.error(res.error?.details);
                 }
             })
-            .catch((e) => toast.error(e))
+            .catch((e) => toast.error(e));
     }
 
     return (
@@ -63,14 +63,14 @@ function WallpaperSource(props: {
             </div>
             <button onClick={handleSourceRemove}>remove</button>
         </div>
-    )
+    );
 }
 
 function WallpaperPreview(props: {
-    wallpaper: ipc.Wallpapers
-    is_active: boolean
-    is_selected: boolean
-    onClick: () => void
+    wallpaper: ipc.Wallpapers;
+    is_active: boolean;
+    is_selected: boolean;
+    onClick: () => void;
 }) {
     return (
         <div onClick={props.onClick}>
@@ -81,101 +81,101 @@ function WallpaperPreview(props: {
                 loading="lazy"
             />
         </div>
-    )
+    );
 }
 
 function App() {
-    const [scanButtonActive, setScanButtonActive] = createSignal(true)
-    const [showSettings, setShowSettings] = createSignal(false)
-    const [searchQuery, setSearchQuery] = createSignal('')
-    const [debouncedSearchQuery, setDebouncedSearchQuery] = createSignal('')
+    const [scanButtonActive, setScanButtonActive] = createSignal(true);
+    const [showSettings, setShowSettings] = createSignal(false);
+    const [searchQuery, setSearchQuery] = createSignal('');
+    const [debouncedSearchQuery, setDebouncedSearchQuery] = createSignal('');
     const [wallpaperSources, setWallpaperSources] = createSignal<
         ipc.WallpaperSources[]
-    >([])
-    const [wallpapers, setWallpapers] = createSignal<ipc.Wallpapers[]>([])
-    const [screens, setScreens] = createSignal<string[]>()
-    const [selectedScreen, setSelectedScreen] = createSignal<string>('all')
-    const [selectedMode, setSelectedMode] = createSignal<ipc.Mode>('contain')
-    const [selectedWallpaper, setSelectedWallpaper] = createSignal<string>() // wallpaper_id
+    >([]);
+    const [wallpapers, setWallpapers] = createSignal<ipc.Wallpapers[]>([]);
+    const [screens, setScreens] = createSignal<string[]>();
+    const [selectedScreen, setSelectedScreen] = createSignal<string>('all');
+    const [selectedMode, setSelectedMode] = createSignal<ipc.Mode>('contain');
+    const [selectedWallpaper, setSelectedWallpaper] = createSignal<string>(); // wallpaper_id
     const [activeWallpapers, setActiveWallpapers] = createSignal<ipc.Active[]>(
         []
-    )
+    );
 
-    const wallpaper_modes: ipc.Mode[] = ['contain', 'tile']
+    const wallpaper_modes: ipc.Mode[] = ['contain', 'tile'];
 
     const debouncedPerformSearch = debounce(
         (query: string) => setDebouncedSearchQuery(query),
         300
-    )
+    );
 
     function handleSearchChange(e: Event) {
-        const value = (e.target as HTMLInputElement).value
+        const value = (e.target as HTMLInputElement).value;
 
-        setSearchQuery(value)
-        debouncedPerformSearch(value)
+        setSearchQuery(value);
+        debouncedPerformSearch(value);
     }
 
     const filteredItems = createMemo(() => {
-        const query = debouncedSearchQuery().toLowerCase()
+        const query = debouncedSearchQuery().toLowerCase();
 
         if (!query) {
-            return wallpapers()
+            return wallpapers();
         }
 
         return wallpapers().filter((item) =>
             item.keywords.toLowerCase().includes(query)
-        )
-    })
+        );
+    });
 
     function fetch_active_wallpapers() {
         ipc.get_active_wallpapers()
             .then((res) => {
                 if (!res.ok && res.data) {
-                    setActiveWallpapers(res.data)
-                } else toast.error(res.error?.details)
+                    setActiveWallpapers(res.data);
+                } else toast.error(res.error?.details);
             })
-            .catch((e) => toast.error(e))
+            .catch((e) => toast.error(e));
     }
 
     onMount(async () => {
         ipc.get_wallpapers()
             .then((res) => {
                 if (!res.ok && res.data) {
-                    setWallpapers(res.data)
-                } else toast.error(res.error?.details)
+                    setWallpapers(res.data);
+                } else toast.error(res.error?.details);
             })
-            .catch((e) => toast.error(e))
+            .catch((e) => toast.error(e));
         ipc.get_wallpaper_sources()
             .then((res) => {
                 if (!res.ok && res.data) {
-                    setWallpaperSources(res.data)
-                } else toast.error(res.error?.details)
+                    setWallpaperSources(res.data);
+                } else toast.error(res.error?.details);
             })
-            .catch((e) => toast.error(e))
+            .catch((e) => toast.error(e));
         ipc.get_screens()
             .then((res) => {
                 if (!res.ok && res.data) {
-                    setScreens(res.data)
-                } else toast.error(res.error?.details)
+                    setScreens(res.data);
+                } else toast.error(res.error?.details);
             })
-            .catch((e) => toast.error(e))
-        fetch_active_wallpapers()
-    })
+            .catch((e) => toast.error(e));
+        fetch_active_wallpapers();
+    });
 
     onCleanup(() => {
-        debouncedPerformSearch.clear()
-    })
+        debouncedPerformSearch.clear();
+    });
 
     async function addSource() {
         const directory = await open({
             directory: true,
-        })
+        });
 
         if (directory) {
             ipc.add_wallpaper_source({ path: directory })
                 .then((res) => {
                     if (!res.ok && res.data) {
-                        setWallpaperSources([...wallpaperSources(), res.data!])
+                        setWallpaperSources([...wallpaperSources(), res.data!]);
                         toast
                             .promise(
                                 ipc.scan_source({ sourceId: res.data.id }),
@@ -190,27 +190,27 @@ function App() {
                                     setWallpapers([
                                         ...wallpapers(),
                                         ...res2.data,
-                                    ])
-                                } else toast.error(res2.error?.details)
+                                    ]);
+                                } else toast.error(res2.error?.details);
                             })
-                            .catch((e) => toast.error(e))
+                            .catch((e) => toast.error(e));
                     } else {
-                        toast.error(res.error?.details)
+                        toast.error(res.error?.details);
                     }
                 })
                 .catch((e) => {
-                    toast.error(e)
-                })
+                    toast.error(e);
+                });
         }
     }
 
     function update_source_list(id: string) {
-        setWallpaperSources(wallpaperSources().filter((x) => x.id !== id))
-        setWallpapers(wallpapers().filter((x) => x.wallpaper_source_id !== id))
+        setWallpaperSources(wallpaperSources().filter((x) => x.id !== id));
+        setWallpapers(wallpapers().filter((x) => x.wallpaper_source_id !== id));
     }
 
     function scanAll() {
-        setScanButtonActive(false)
+        setScanButtonActive(false);
         toast
             .promise(ipc.scan_all_sources(), {
                 loading: 'Scanning all sources...',
@@ -219,27 +219,27 @@ function App() {
             })
             .then((res) => {
                 if (!res.ok && res.data) {
-                    setWallpapers(res.data)
+                    setWallpapers(res.data);
                 } else {
-                    toast.error(res.error?.details)
+                    toast.error(res.error?.details);
                 }
             })
             .catch((e) => toast.error(e))
-            .finally(() => setScanButtonActive(true))
+            .finally(() => setScanButtonActive(true));
     }
 
     function setWallpaper() {
-        const selected_wallpaper = selectedWallpaper()
+        const selected_wallpaper = selectedWallpaper();
 
         if (selected_wallpaper && selected_wallpaper !== undefined) {
-            const screens_list: string[] = []
+            const screens_list: string[] = [];
 
             if (selectedScreen() === 'all') {
                 screens()?.map((x) => {
-                    screens_list.push(x)
-                })
+                    screens_list.push(x);
+                });
             } else {
-                screens_list.push(selectedScreen())
+                screens_list.push(selectedScreen());
             }
 
             toast
@@ -257,12 +257,12 @@ function App() {
                 )
                 .then((res) => {
                     if (!res.ok && res.data) {
-                        fetch_active_wallpapers()
+                        fetch_active_wallpapers();
                     } else {
-                        toast.error(res.error?.details)
+                        toast.error(res.error?.details);
                     }
                 })
-                .catch((e) => toast.error(e))
+                .catch((e) => toast.error(e));
         }
     }
 
@@ -328,7 +328,7 @@ function App() {
                                 wallpaper={x}
                                 onClick={() => setSelectedWallpaper(x.id)}
                             />
-                        )
+                        );
                     }}
                 </For>
                 <Switch>
@@ -377,7 +377,7 @@ function App() {
                 </div>
             </Show>
         </main>
-    )
+    );
 }
 
-export default App
+export default App;
