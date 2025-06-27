@@ -1,38 +1,11 @@
 import { invoke } from '@tauri-apps/api/core';
-
-export type Mode = 'contain' | 'tile';
-
-export interface Active {
-    screen: string;
-    wallpaper_id: string;
-    mode: Mode;
-}
-
-export interface WallpaperSources {
-    id: string;
-    path: string;
-    active: boolean;
-}
-
-export interface Wallpapers {
-    id: string;
-    signature: string;
-    path: string;
-    resolution: string;
-    wallpaper_source_id: string;
-    keywords: string;
-}
-
-export interface Error {
-    message: string;
-    details: string;
-}
-
-export interface Response<T> {
-    ok: boolean;
-    data?: T;
-    error?: Error;
-}
+import {
+    Response,
+    WallpaperSources,
+    Mode,
+    Active,
+    Wallpapers,
+} from './types.ts';
 
 export function get_screens(): Promise<Response<string[]>> {
     return invoke('get_screens');
@@ -54,11 +27,6 @@ export function update_wallpaper_source_active(props: {
 }): Promise<Response<WallpaperSources>> {
     return invoke('update_wallpaper_source_active', props);
 }
-
-// pub fn remove_wallpaper_source(
-//     state: State<'_, DbPoolWrapper>,
-//     id: String,
-// ) -> Response<db_models::WallpaperSources> {
 
 export function remove_wallpaper_source(props: {
     id: string;
