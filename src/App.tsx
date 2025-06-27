@@ -240,7 +240,7 @@ function App() {
             .finally(() => setScanButtonActive(true));
     }
 
-    function setWallpaper() {
+    function setWallpaper(isTemporary: boolean) {
         const selected_wallpaper = selectedWallpaper();
 
         if (selected_wallpaper && selected_wallpaper !== undefined) {
@@ -260,6 +260,7 @@ function App() {
                         screens: screens_list,
                         wallpaperId: selected_wallpaper,
                         mode: selectedMode(),
+                        isTemporary: isTemporary,
                     }),
                     {
                         loading: 'Setting wallpaper...',
@@ -276,6 +277,12 @@ function App() {
                 })
                 .catch((e) => toast.error(e));
         }
+    }
+
+    function handleThumbnailClick(id: string) {
+        setSelectedWallpaper(id);
+
+        setWallpaper(true);
     }
 
     return (
@@ -338,7 +345,7 @@ function App() {
                                 )}
                                 is_selected={x.id === selectedWallpaper()}
                                 wallpaper={x}
-                                onClick={() => setSelectedWallpaper(x.id)}
+                                onClick={() => handleThumbnailClick(x.id)}
                             />
                         );
                     }}

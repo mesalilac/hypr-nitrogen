@@ -11,6 +11,7 @@ pub fn set_wallpaper(
     screens: Vec<String>,
     wallpaper_id: String,
     mode: String,
+    is_temporary: bool,
 ) -> Response<db_models::Wallpapers> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
@@ -41,25 +42,27 @@ pub fn set_wallpaper(
                 let active =
                     db_models::NewActive::new(screen, wallpaper_id.clone(), h_mode.to_string());
 
-                match diesel::insert_into(schema::active::table)
-                    .values(&active)
-                    .on_conflict(schema::active::dsl::screen)
-                    .do_update()
-                    .set((
-                        schema::active::dsl::wallpaper_id
-                            .eq(excluded(schema::active::dsl::wallpaper_id)),
-                        schema::active::dsl::mode.eq(excluded(schema::active::dsl::mode)),
-                    ))
-                    .execute(&mut conn)
-                {
-                    Ok(_) => {}
-                    Err(e) => {
-                        return Response::error(
-                            "Error setting wallpaper as active".to_string(),
-                            Some(e.to_string()),
-                        )
-                    }
-                };
+                if !is_temporary {
+                    match diesel::insert_into(schema::active::table)
+                        .values(&active)
+                        .on_conflict(schema::active::dsl::screen)
+                        .do_update()
+                        .set((
+                            schema::active::dsl::wallpaper_id
+                                .eq(excluded(schema::active::dsl::wallpaper_id)),
+                            schema::active::dsl::mode.eq(excluded(schema::active::dsl::mode)),
+                        ))
+                        .execute(&mut conn)
+                    {
+                        Ok(_) => {}
+                        Err(e) => {
+                            return Response::error(
+                                "Error setting wallpaper as active".to_string(),
+                                Some(e.to_string()),
+                            )
+                        }
+                    };
+                }
             }
             Err(e) => {
                 return Response::error("Error setting wallpaper".to_string(), Some(e.to_string()))

@@ -8,6 +8,7 @@ export const set = {
         screens: string[];
         wallpaperId: string;
         mode: types.Mode;
+        isTemporary: boolean;
     }): Promise<types.Response<types.Active>> {
         return invoke('set_wallpaper', props);
     },
