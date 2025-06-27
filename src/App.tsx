@@ -28,7 +28,8 @@ function WallpaperSource(props: {
 
     function handleCheckboxChange(v: boolean) {
         setActive(v);
-        ipc.update_wallpaper_source_active({ id: props.id, active: active() })
+        ipc.update
+            .wallpaper_source_active({ id: props.id, active: active() })
             .then((res) => {
                 if (!res.ok && res.data) {
                 } else {
@@ -39,7 +40,8 @@ function WallpaperSource(props: {
     }
 
     function handleSourceRemove() {
-        ipc.remove_wallpaper_source({ id: props.id })
+        ipc.remove
+            .wallpaper_source({ id: props.id })
             .then((res) => {
                 if (!res.ok && res.data) {
                     props.update_source_list_fn(props.id);
@@ -68,7 +70,7 @@ function WallpaperSource(props: {
 }
 
 function WallpaperPreview(props: {
-    wallpaper: ipc.Wallpapers;
+    wallpaper: ipc.types.Wallpapers;
     is_active: boolean;
     is_selected: boolean;
     onClick: () => void;
@@ -92,18 +94,21 @@ function App() {
     const [searchQuery, setSearchQuery] = createSignal('');
     const [debouncedSearchQuery, setDebouncedSearchQuery] = createSignal('');
     const [wallpaperSources, setWallpaperSources] = createSignal<
-        ipc.WallpaperSources[]
+        ipc.types.WallpaperSources[]
     >([]);
-    const [wallpapers, setWallpapers] = createSignal<ipc.Wallpapers[]>([]);
-    const [screens, setScreens] = createSignal<string[]>();
-    const [selectedScreen, setSelectedScreen] = createSignal<string>('all');
-    const [selectedMode, setSelectedMode] = createSignal<ipc.Mode>('contain');
-    const [selectedWallpaper, setSelectedWallpaper] = createSignal<string>(); // wallpaper_id
-    const [activeWallpapers, setActiveWallpapers] = createSignal<ipc.Active[]>(
+    const [wallpapers, setWallpapers] = createSignal<ipc.types.Wallpapers[]>(
         []
     );
+    const [screens, setScreens] = createSignal<string[]>();
+    const [selectedScreen, setSelectedScreen] = createSignal<string>('all');
+    const [selectedMode, setSelectedMode] =
+        createSignal<ipc.types.Mode>('contain');
+    const [selectedWallpaper, setSelectedWallpaper] = createSignal<string>(); // wallpaper_id
+    const [activeWallpapers, setActiveWallpapers] = createSignal<
+        ipc.types.Active[]
+    >([]);
 
-    const wallpaper_modes: ipc.Mode[] = ['contain', 'tile'];
+    const wallpaper_modes: ipc.types.Mode[] = ['contain', 'tile'];
 
     const debouncedPerformSearch = debounce(
         (query: string) => setDebouncedSearchQuery(query),
@@ -130,7 +135,8 @@ function App() {
     });
 
     function fetch_active_wallpapers() {
-        ipc.get_active_wallpapers()
+        ipc.get
+            .active_wallpapers()
             .then((res) => {
                 if (!res.ok && res.data) {
                     setActiveWallpapers(res.data);
@@ -140,21 +146,24 @@ function App() {
     }
 
     onMount(async () => {
-        ipc.get_wallpapers()
+        ipc.get
+            .wallpapers()
             .then((res) => {
                 if (!res.ok && res.data) {
                     setWallpapers(res.data);
                 } else toast.error(res.error?.details);
             })
             .catch((e) => toast.error(e));
-        ipc.get_wallpaper_sources()
+        ipc.get
+            .wallpaper_sources()
             .then((res) => {
                 if (!res.ok && res.data) {
                     setWallpaperSources(res.data);
                 } else toast.error(res.error?.details);
             })
             .catch((e) => toast.error(e));
-        ipc.get_screens()
+        ipc.get
+            .screens()
             .then((res) => {
                 if (!res.ok && res.data) {
                     setScreens(res.data);
@@ -174,13 +183,14 @@ function App() {
         });
 
         if (directory) {
-            ipc.add_wallpaper_source({ path: directory })
+            ipc.add
+                .wallpaper_source({ path: directory })
                 .then((res) => {
                     if (!res.ok && res.data) {
                         setWallpaperSources([...wallpaperSources(), res.data!]);
                         toast
                             .promise(
-                                ipc.scan_source({ sourceId: res.data.id }),
+                                ipc.util.scan_source({ sourceId: res.data.id }),
                                 {
                                     loading: 'Scanning...',
                                     success: 'Scan complete',
@@ -214,7 +224,7 @@ function App() {
     function scanAll() {
         setScanButtonActive(false);
         toast
-            .promise(ipc.scan_all_sources(), {
+            .promise(ipc.util.scan_all_sources(), {
                 loading: 'Scanning all sources...',
                 success: 'Scan complete',
                 error: 'Scan failed',
@@ -246,7 +256,7 @@ function App() {
 
             toast
                 .promise(
-                    ipc.set_wallpaper({
+                    ipc.set.wallpaper({
                         screens: screens_list,
                         wallpaperId: selected_wallpaper,
                         mode: selectedMode(),
@@ -295,7 +305,7 @@ function App() {
                         onInput={(e) =>
                             setSelectedMode(
                                 (e.target as HTMLSelectElement)
-                                    .value as ipc.Mode
+                                    .value as ipc.types.Mode
                             )
                         }
                     >
