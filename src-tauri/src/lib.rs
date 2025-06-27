@@ -139,6 +139,7 @@ pub fn run() {
             ipc::remove_wallpaper_source,
             ipc::scan_source,
             ipc::scan_all_sources,
+            ipc::restore_wallpapers
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

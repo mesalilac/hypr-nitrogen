@@ -285,6 +285,16 @@ function App() {
         setWallpaper(true);
     }
 
+    function restoreWallpapers() {
+        toast
+            .promise(ipc.util.restore_wallpapers(), {
+                loading: 'Restoring wallpapers...',
+                success: 'Wallpapers restored',
+                error: 'Failed to restore wallpapers',
+            })
+            .catch((e) => toast.error(e));
+    }
+
     return (
         <main class="container">
             <Toaster />
@@ -323,13 +333,14 @@ function App() {
                 </div>
                 <span>{filteredItems().length} wallpapers</span>
                 <div class="header-right">
+                    <button onClick={restoreWallpapers}>Restore</button>
                     <button disabled={!scanButtonActive()} onClick={scanAll}>
                         Scan
                     </button>
                     <button onClick={() => setShowSettings(true)}>
                         Settings
                     </button>
-                    <button onClick={setWallpaper}>Apply</button>
+                    <button onClick={() => setWallpaper(true)}>Apply</button>
                 </div>
             </div>
             <div class="preview-list">

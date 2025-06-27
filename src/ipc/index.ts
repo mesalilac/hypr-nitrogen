@@ -63,4 +63,7 @@ export const util = {
     scan_all_sources(): Promise<types.Response<types.Wallpapers[]>> {
         return invoke('scan_all_sources');
     },
+    restore_wallpapers(): Promise<types.Response<boolean>> {
+        return invoke('restore_wallpapers');
+    },
 };
