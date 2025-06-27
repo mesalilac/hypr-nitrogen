@@ -16,6 +16,7 @@ pub enum DispatchErrorKind {
     UnknownRequest,
     NoSuchFile,
     WallpaperNotPreloaded,
+    SockConnectionFailed,
 }
 
 impl fmt::Display for DispatchErrorKind {
@@ -25,6 +26,9 @@ impl fmt::Display for DispatchErrorKind {
             Self::NoSuchFile => write!(f, "No such file"),
             Self::WallpaperNotPreloaded => {
                 write!(f, "Wallpaper not preloaded")
+            }
+            Self::SockConnectionFailed => {
+                write!(f, "Sock connection failed")
             }
         }
     }
@@ -47,14 +51,17 @@ impl fmt::Display for Error {
     }
 }
 
+#[derive(PartialEq)]
 pub enum Mode {
-    Contain, // Default
+    Default,
+    Contain,
     Tile,
 }
 
 impl fmt::Display for Mode {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            Self::Default => write!(f, "default"),
             Self::Contain => write!(f, "contain"),
             Self::Tile => write!(f, "tile"),
         }
@@ -64,9 +71,10 @@ impl fmt::Display for Mode {
 impl Mode {
     pub fn from_string(string: String) -> Self {
         match string.to_lowercase().as_str() {
+            "default" => Mode::Default,
             "contain" => Mode::Contain,
             "tile" => Mode::Tile,
-            _ => Mode::Contain,
+            _ => Mode::Default,
         }
     }
 }
@@ -150,11 +158,15 @@ pub fn unload(wallpaper: Unload) -> Result<bool, Error> {
 }
 
 pub fn preload(wallpaper: String) -> Result<bool, Error> {
-    let command = vec![HYPRPAPER_CMD, "preload", &wallpaper];
-
-    match process::Command::new(HYPRCTL_CMD).args(command).output() {
-        Ok(output) => match String::from_utf8(output.stdout.clone()) {
-            Ok(text) => {
+    match process::Command::new("sh")
+        .args([
+            "-c",
+            &format!("{} {} preload '{}'", HYPRCTL_CMD, HYPRPAPER_CMD, wallpaper),
+        ])
+        .output()
+    {
+        Ok(output) => {
+            if let Ok(text) = String::from_utf8(output.stdout.clone()) {
                 if text == UNKNOWN_REQUEST_ERROR {
                     return Err(Error::Dispatch(DispatchErrorKind::UnknownRequest));
                 } else if text.starts_with(NO_SUCH_FILE_ERROR) {
@@ -165,28 +177,50 @@ pub fn preload(wallpaper: String) -> Result<bool, Error> {
                     return Ok(true);
                 }
             }
-            Err(_) => {}
-        },
+        }
         Err(e) => return Err(Error::Os(e)),
     }
 
     Ok(true)
 }
 
-pub fn set_wallpaper(screen: &String, wallpaper: String, mode: &Mode) -> Result<bool, Error> {
+pub fn set_wallpaper(screen: String, wallpaper: String, mode: &Mode) -> Result<bool, Error> {
     let mode_string = mode.to_string();
+
+    if !std::path::Path::new(&wallpaper).exists() {
+        println!("Wallpaper not found, '{}'", wallpaper);
+        return Err(Error::Dispatch(DispatchErrorKind::NoSuchFile));
+    }
+
+    preload(wallpaper.clone())?;
 
     let mut wallpaper_command_value = String::new();
 
-    wallpaper_command_value.push_str(screen);
+    // NOTE: screen is disable because im having a problem with setting a wallpaper for all screens
+    // when a wallpaper is set for a single screen you can't change it
+    // using `hyprctl hyprpaper ",<path>"` you need to target the screen
+    //
+    if screen != "all" {
+        // wallpaper_command_value.push_str(&screen);
+    }
     wallpaper_command_value.push(',');
-    wallpaper_command_value.push_str(&mode_string);
-    wallpaper_command_value.push(':');
+    if mode != &Mode::Default {
+        wallpaper_command_value.push_str(&mode_string);
+        wallpaper_command_value.push(':');
+    }
     wallpaper_command_value.push_str(&wallpaper);
 
-    let command = vec![HYPRPAPER_CMD, "reload", &wallpaper_command_value];
+    let cmd = process::Command::new("sh")
+        .args([
+            "-c",
+            &format!(
+                "{} {} wallpaper '{}'",
+                HYPRCTL_CMD, HYPRPAPER_CMD, wallpaper_command_value
+            ),
+        ])
+        .output();
 
-    match process::Command::new(HYPRCTL_CMD).args(command).output() {
+    match cmd {
         Ok(output) => {
             if let Ok(text) = String::from_utf8(output.stdout.clone()) {
                 if text == UNKNOWN_REQUEST_ERROR {
@@ -197,6 +231,8 @@ pub fn set_wallpaper(screen: &String, wallpaper: String, mode: &Mode) -> Result<
                     return Err(Error::Dispatch(DispatchErrorKind::WallpaperNotPreloaded));
                 } else if text.contains("no such file:") {
                     return Err(Error::Dispatch(DispatchErrorKind::NoSuchFile));
+                } else if text.starts_with("Couldn't connect to") {
+                    return Err(Error::Dispatch(DispatchErrorKind::SockConnectionFailed));
                 }
 
                 if output.status.success() && text == "Ok\n" {

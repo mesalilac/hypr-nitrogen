@@ -73,8 +73,6 @@ pub async fn scan_all_sources(
 }
 
 pub fn restore(conn: &mut SqliteConnection) -> Result<bool, String> {
-    // TODO: fetch active wallpapers and set them using hyprpaper
-
     let active_wallpapers = match schema::active::table.get_results::<db_models::Active>(conn) {
         Ok(v) => v,
         Err(e) => return Err(e.to_string()),
@@ -86,17 +84,24 @@ pub fn restore(conn: &mut SqliteConnection) -> Result<bool, String> {
             .get_result::<db_models::Wallpapers>(conn)
         {
             Ok(v) => v,
-            Err(_) => continue,
+            Err(_) => {
+                continue;
+            }
         };
 
+        // NOTE: Multi screen is disabled for now
+        // Also if you run `hyprpaper::set_wallpaper` in a loop that can crash hyprpaper daemon
         match hyprpaper::set_wallpaper(
-            &active_wallpaper.screen,
-            wallpaper.id,
+            // active_wallpaper.screen,
+            "all".to_string(),
+            wallpaper.path,
             &hyprpaper::Mode::from_string(active_wallpaper.mode),
         ) {
             Ok(_) => {}
             Err(e) => return Err(e.to_string()),
         }
+
+        break;
     }
 
     Ok(true)

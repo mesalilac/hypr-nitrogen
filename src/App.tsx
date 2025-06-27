@@ -102,13 +102,13 @@ function App() {
     const [screens, setScreens] = createSignal<string[]>();
     const [selectedScreen, setSelectedScreen] = createSignal<string>('all');
     const [selectedMode, setSelectedMode] =
-        createSignal<ipc.types.Mode>('contain');
+        createSignal<ipc.types.Mode>('default');
     const [selectedWallpaper, setSelectedWallpaper] = createSignal<string>(); // wallpaper_id
     const [activeWallpapers, setActiveWallpapers] = createSignal<
         ipc.types.Active[]
     >([]);
 
-    const wallpaper_modes: ipc.types.Mode[] = ['contain', 'tile'];
+    const wallpaper_modes: ipc.types.Mode[] = ['default', 'contain', 'tile'];
 
     const debouncedPerformSearch = debounce(
         (query: string) => setDebouncedSearchQuery(query),
@@ -244,20 +244,10 @@ function App() {
         const selected_wallpaper = selectedWallpaper();
 
         if (selected_wallpaper && selected_wallpaper !== undefined) {
-            const screens_list: string[] = [];
-
-            if (selectedScreen() === 'all') {
-                screens()?.map((x) => {
-                    screens_list.push(x);
-                });
-            } else {
-                screens_list.push(selectedScreen());
-            }
-
             toast
                 .promise(
                     ipc.set.wallpaper({
-                        screens: screens_list,
+                        screen: selectedScreen(),
                         wallpaperId: selected_wallpaper,
                         mode: selectedMode(),
                         isTemporary: isTemporary,
@@ -291,6 +281,12 @@ function App() {
                 loading: 'Restoring wallpapers...',
                 success: 'Wallpapers restored',
                 error: 'Failed to restore wallpapers',
+            })
+            .then((res) => {
+                if (!res.ok && res.data) {
+                } else {
+                    toast.error(res.error?.details);
+                }
             })
             .catch((e) => toast.error(e));
     }

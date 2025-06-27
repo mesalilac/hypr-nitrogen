@@ -42,7 +42,7 @@ pub struct Wallpapers {
     pub keywords: Option<String>,
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Debug)]
 #[diesel(table_name = schema::active)]
 pub struct NewActive {
     pub screen: String,

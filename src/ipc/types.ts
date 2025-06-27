@@ -1,4 +1,4 @@
-export type Mode = 'contain' | 'tile';
+export type Mode = 'default' | 'contain' | 'tile';
 
 export interface Active {
     screen: string;

@@ -5,7 +5,7 @@ export { types };
 
 export const set = {
     wallpaper(props: {
-        screens: string[];
+        screen: string;
         wallpaperId: string;
         mode: types.Mode;
         isTemporary: boolean;
