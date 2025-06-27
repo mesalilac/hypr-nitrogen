@@ -29,4 +29,14 @@ export default defineConfig([
         extends: ['json/recommended'],
     },
     eslintConfigPrettier,
+    {
+        rules: {
+            'no-console': [
+                'error',
+                {
+                    allow: ['warn', 'error'],
+                },
+            ],
+        },
+    },
 ])
