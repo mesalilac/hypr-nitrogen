@@ -229,10 +229,10 @@ function App() {
     }
 
     function setWallpaper() {
-        let selected_wallpaper = selectedWallpaper()
+        const selected_wallpaper = selectedWallpaper()
 
         if (selected_wallpaper && selected_wallpaper !== undefined) {
-            let screens_list: string[] = []
+            const screens_list: string[] = []
 
             if (selectedScreen() == 'all') {
                 screens()?.map((x) => {
