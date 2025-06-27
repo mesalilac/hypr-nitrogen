@@ -31,6 +31,7 @@ export default defineConfig([
     eslintConfigPrettier,
     {
         rules: {
+            eqeqeq: 'error',
             'no-console': [
                 'error',
                 {
