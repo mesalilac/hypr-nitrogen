@@ -12,6 +12,7 @@ import { open } from '@tauri-apps/plugin-dialog';
 import toast, { Toaster } from 'solid-toast';
 import { debounce } from '@solid-primitives/scheduled';
 import { convertFileSrc } from '@tauri-apps/api/core';
+import fallbackImage from './assets/fallback-image.svg';
 import * as ipc from './ipc';
 import './App.css';
 
@@ -79,6 +80,7 @@ function WallpaperPreview(props: {
                 class={`preview-image ${props.is_active ? 'wallpaper-preview-active' : ''}`}
                 src={convertFileSrc(props.wallpaper.path)}
                 loading="lazy"
+                onError={(e) => (e.currentTarget.src = fallbackImage)}
             />
         </div>
     );
