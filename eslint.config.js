@@ -4,6 +4,7 @@ import tseslint from 'typescript-eslint'
 import json from '@eslint/json'
 import { defineConfig } from 'eslint/config'
 import eslintConfigPrettier from 'eslint-config-prettier'
+import solid from 'eslint-plugin-solid/configs/recommended'
 
 export default defineConfig([
     {
@@ -28,6 +29,7 @@ export default defineConfig([
         language: 'json/jsonc',
         extends: ['json/recommended'],
     },
+    solid,
     eslintConfigPrettier,
     {
         rules: {
