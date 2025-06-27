@@ -234,7 +234,7 @@ function App() {
         if (selected_wallpaper && selected_wallpaper !== undefined) {
             const screens_list: string[] = []
 
-            if (selectedScreen() == 'all') {
+            if (selectedScreen() === 'all') {
                 screens()?.map((x) => {
                     screens_list.push(x)
                 })
