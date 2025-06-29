@@ -336,7 +336,7 @@ function App() {
                     <button onClick={() => setShowSettings(true)}>
                         Settings
                     </button>
-                    <button onClick={() => setWallpaper(false)}>Apply</button>
+                    <button onClick={() => setWallpaper(false)}>Save</button>
                 </div>
             </div>
             <div class='preview-list'>
