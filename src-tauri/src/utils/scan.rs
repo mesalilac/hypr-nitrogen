@@ -1,4 +1,4 @@
-use crate::db_models;
+use crate::database::models::*;
 use crate::ipc::{IpcError, Response};
 use crate::schema;
 use diesel::prelude::*;
@@ -18,7 +18,7 @@ pub struct WallpaperMetadata {
 }
 
 type MetadataHashMap = HashMap<String, WallpaperMetadata>;
-type WallpapersHashMap = HashMap<String, db_models::NewWallpaper>;
+type WallpapersHashMap = HashMap<String, NewWallpaper>;
 
 fn extract_metadata(metadata: &mut MetadataHashMap, path: &Path) {
     match std::fs::read_to_string(path) {
@@ -73,7 +73,7 @@ pub fn scan(
     conn: &mut SqliteConnection,
     id: String,
     path: String,
-) -> Result<Vec<db_models::Wallpapers>, IpcError> {
+) -> Result<Vec<Wallpapers>, IpcError> {
     let mut wallpapers_hashmap: WallpapersHashMap = HashMap::new();
     let mut metadata: MetadataHashMap = HashMap::new();
 
@@ -90,7 +90,7 @@ pub fn scan(
             Some(ext) => {
                 if is_image_extension(ext) {
                     if let Some(signature) = generate_signature(entry.path()) {
-                        let new_wallpaper = db_models::NewWallpaper::new(
+                        let new_wallpaper = NewWallpaper::new(
                             signature.clone(),
                             entry.path().to_string_lossy().to_string(),
                             None, // TODO: Extract resolution
@@ -138,12 +138,12 @@ pub fn scan(
         }
     });
 
-    let mut wallpapers_list: Vec<db_models::Wallpapers> = Vec::new();
+    let mut wallpapers_list: Vec<Wallpapers> = Vec::new();
 
     for w in wallpapers_hashmap.values() {
         match diesel::insert_into(schema::wallpapers::table)
             .values(w)
-            .get_result::<db_models::Wallpapers>(conn)
+            .get_result::<Wallpapers>(conn)
         {
             Ok(v) => {
                 wallpapers_list.push(v);
@@ -165,13 +165,11 @@ pub fn scan(
     Ok(wallpapers_list)
 }
 
-pub fn scan_all(
-    conn: &mut SqliteConnection,
-) -> Result<Response<Vec<db_models::Wallpapers>>, IpcError> {
-    let mut wallpapers_list: Vec<db_models::Wallpapers> = Vec::new();
+pub fn scan_all(conn: &mut SqliteConnection) -> Result<Response<Vec<Wallpapers>>, IpcError> {
+    let mut wallpapers_list: Vec<Wallpapers> = Vec::new();
 
-    let wallpaper_sources: Vec<db_models::WallpaperSources> =
-        match schema::wallpaper_sources::table.get_results::<db_models::WallpaperSources>(conn) {
+    let wallpaper_sources: Vec<WallpaperSources> =
+        match schema::wallpaper_sources::table.get_results::<WallpaperSources>(conn) {
             Ok(v) => v,
             Err(e) => {
                 return Err(IpcError {

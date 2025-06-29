@@ -1,12 +1,8 @@
 mod database;
-mod db_models;
 mod hyprpaper;
 mod ipc;
-mod scan;
 mod schema;
 mod utils;
-
-use std::path::PathBuf;
 
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use dotenvy::dotenv;
@@ -18,7 +14,7 @@ const APP_NAME: &str = "hypr-nitrogen";
 pub fn run() {
     dotenv().ok();
 
-    let pool = database::get_connection_pool();
+    let pool = database::connection::get_connection_pool();
 
     if let Ok(mut conn) = pool.get() {
         match conn.run_pending_migrations(MIGRATIONS) {
@@ -34,7 +30,7 @@ pub fn run() {
     std::env::set_var("GDK_BACKEND", "wayland");
 
     tauri::Builder::default()
-        .manage(database::DbPoolWrapper { pool })
+        .manage(database::connection::DbPoolWrapper { pool })
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
