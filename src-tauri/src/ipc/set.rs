@@ -1,7 +1,8 @@
-use crate::database::DbPoolWrapper;
+use crate::database::connection::DbPoolWrapper;
+use crate::database::models::*;
 use crate::hyprpaper;
 use crate::ipc::Response;
-use crate::{db_models, schema};
+use crate::schema;
 use diesel::prelude::*;
 use diesel::upsert::excluded;
 use rand::Rng;
@@ -14,7 +15,7 @@ pub fn set_wallpaper(
     wallpaper_id: Option<String>,
     mode: String,
     is_temporary: bool,
-) -> Response<db_models::Wallpapers> {
+) -> Response<Wallpapers> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
         Err(e) => {
@@ -34,11 +35,11 @@ pub fn set_wallpaper(
 
     println!("wallpaper_id: {:#?}", wallpaper_id);
 
-    let wallpaper: Option<db_models::Wallpapers> = match wallpaper_id {
+    let wallpaper: Option<Wallpapers> = match wallpaper_id {
         Some(id) => {
             match schema::wallpapers::table
                 .filter(schema::wallpapers::id.eq(&id))
-                .get_result::<db_models::Wallpapers>(&mut conn)
+                .get_result::<Wallpapers>(&mut conn)
             {
                 Ok(v) => Some(v),
                 Err(e) => {
@@ -49,7 +50,7 @@ pub fn set_wallpaper(
                 }
             }
         }
-        None => match schema::wallpapers::table.get_results::<db_models::Wallpapers>(&mut conn) {
+        None => match schema::wallpapers::table.get_results::<Wallpapers>(&mut conn) {
             Ok(v) => {
                 let mut rng = rand::rng();
                 let r = rng.random_range(0..v.len());
@@ -69,13 +70,13 @@ pub fn set_wallpaper(
         match hyprpaper::set_wallpaper(screen.clone(), target_wallpaper.path.clone(), &h_mode) {
             Ok(_) => {
                 if !is_temporary {
-                    let mut actives_list: Vec<db_models::NewActive> = Vec::new();
+                    let mut actives_list: Vec<NewActive> = Vec::new();
 
                     if screen == "all" {
                         match hyprpaper::active_screens() {
                             Ok(v) => {
                                 for a in v {
-                                    actives_list.push(db_models::NewActive::new(
+                                    actives_list.push(NewActive::new(
                                         a,
                                         target_wallpaper.id.clone(),
                                         h_mode.to_string(),
@@ -90,7 +91,7 @@ pub fn set_wallpaper(
                             }
                         }
                     } else {
-                        actives_list.push(db_models::NewActive::new(
+                        actives_list.push(NewActive::new(
                             screen,
                             target_wallpaper.id.clone(),
                             h_mode.to_string(),
@@ -135,18 +136,18 @@ pub fn set_wallpaper(
 pub fn add_wallpaper_source(
     state: State<'_, DbPoolWrapper>,
     path: String,
-) -> Response<db_models::WallpaperSources> {
+) -> Response<WallpaperSources> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
         Err(e) => {
             return Response::error("Error getting connection".to_string(), Some(e.to_string()))
         }
     };
-    let wallpaper_source = db_models::NewWallpaperSource::new(path);
+    let wallpaper_source = NewWallpaperSource::new(path);
 
     match diesel::insert_into(schema::wallpaper_sources::table)
         .values(&wallpaper_source)
-        .get_result::<db_models::WallpaperSources>(&mut conn)
+        .get_result::<WallpaperSources>(&mut conn)
     {
         Ok(v) => Response::ok(v),
         Err(e) => Response::error(
@@ -161,7 +162,7 @@ pub fn update_wallpaper_source_active(
     state: State<'_, DbPoolWrapper>,
     id: String,
     active: bool,
-) -> Response<db_models::WallpaperSources> {
+) -> Response<WallpaperSources> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
         Err(e) => {

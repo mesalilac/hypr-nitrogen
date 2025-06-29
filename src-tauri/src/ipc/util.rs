@@ -1,18 +1,17 @@
-use crate::database::DbPoolWrapper;
+use crate::database::connection::DbPoolWrapper;
+use crate::database::models::*;
 use crate::hyprpaper;
 use crate::ipc::Response;
-use crate::scan::{scan, scan_all};
-use crate::{db_models, schema};
+use crate::schema;
+use crate::utils::scan::{scan, scan_all};
 use diesel::prelude::*;
 use tauri::State;
-
-use super::IpcError;
 
 #[tauri::command]
 pub async fn scan_source(
     state: State<'_, DbPoolWrapper>,
     source_id: String,
-) -> Result<Response<Vec<db_models::Wallpapers>>, ()> {
+) -> Result<Response<Vec<Wallpapers>>, ()> {
     use schema::wallpaper_sources::dsl::*;
 
     let mut conn = match state.pool.get() {
@@ -27,7 +26,7 @@ pub async fn scan_source(
 
     let wallpaper_source = match wallpaper_sources
         .find(source_id)
-        .get_result::<db_models::WallpaperSources>(&mut conn)
+        .get_result::<WallpaperSources>(&mut conn)
     {
         Ok(v) => v,
         Err(e) => {
@@ -49,7 +48,7 @@ pub async fn scan_source(
 #[tauri::command]
 pub async fn scan_all_sources(
     state: State<'_, DbPoolWrapper>,
-) -> Result<Response<Vec<db_models::Wallpapers>>, String> {
+) -> Result<Response<Vec<Wallpapers>>, String> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
         Err(e) => {
@@ -74,7 +73,7 @@ pub async fn scan_all_sources(
 }
 
 pub fn restore(conn: &mut SqliteConnection) -> Result<bool, String> {
-    let active_wallpapers = match schema::active::table.get_results::<db_models::Active>(conn) {
+    let active_wallpapers = match schema::active::table.get_results::<Active>(conn) {
         Ok(v) => v,
         Err(e) => return Err(e.to_string()),
     };
@@ -82,7 +81,7 @@ pub fn restore(conn: &mut SqliteConnection) -> Result<bool, String> {
     for active_wallpaper in active_wallpapers {
         let wallpaper = match schema::wallpapers::table
             .filter(schema::wallpapers::dsl::id.eq(active_wallpaper.wallpaper_id))
-            .get_result::<db_models::Wallpapers>(conn)
+            .get_result::<Wallpapers>(conn)
         {
             Ok(v) => v,
             Err(_) => {

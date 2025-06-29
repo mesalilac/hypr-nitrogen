@@ -1,7 +1,8 @@
-use crate::database::DbPoolWrapper;
+use crate::database::connection::DbPoolWrapper;
+use crate::database::models::*;
 use crate::hyprpaper;
 use crate::ipc::Response;
-use crate::{db_models, schema};
+use crate::schema;
 use diesel::prelude::*;
 use tauri::State;
 
@@ -15,9 +16,7 @@ pub fn get_screens() -> Response<Vec<String>> {
 }
 
 #[tauri::command]
-pub fn get_wallpaper_sources(
-    state: State<'_, DbPoolWrapper>,
-) -> Response<Vec<db_models::WallpaperSources>> {
+pub fn get_wallpaper_sources(state: State<'_, DbPoolWrapper>) -> Response<Vec<WallpaperSources>> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
         Err(e) => {
@@ -25,7 +24,7 @@ pub fn get_wallpaper_sources(
         }
     };
 
-    match schema::wallpaper_sources::table.get_results::<db_models::WallpaperSources>(&mut conn) {
+    match schema::wallpaper_sources::table.get_results::<WallpaperSources>(&mut conn) {
         Ok(v) => Response::ok(v),
         Err(e) => Response::error(
             "Error getting wallpaper sources".to_string(),
@@ -35,7 +34,7 @@ pub fn get_wallpaper_sources(
 }
 
 #[tauri::command]
-pub fn get_wallpapers(state: State<'_, DbPoolWrapper>) -> Response<Vec<db_models::Wallpapers>> {
+pub fn get_wallpapers(state: State<'_, DbPoolWrapper>) -> Response<Vec<Wallpapers>> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
         Err(e) => {
@@ -43,14 +42,14 @@ pub fn get_wallpapers(state: State<'_, DbPoolWrapper>) -> Response<Vec<db_models
         }
     };
 
-    match schema::wallpapers::table.get_results::<db_models::Wallpapers>(&mut conn) {
+    match schema::wallpapers::table.get_results::<Wallpapers>(&mut conn) {
         Ok(v) => Response::ok(v),
         Err(e) => Response::error("Error getting wallpapers".to_string(), Some(e.to_string())),
     }
 }
 
 #[tauri::command]
-pub fn get_active_wallpapers(state: State<'_, DbPoolWrapper>) -> Response<Vec<db_models::Active>> {
+pub fn get_active_wallpapers(state: State<'_, DbPoolWrapper>) -> Response<Vec<Active>> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
         Err(e) => {
@@ -58,7 +57,7 @@ pub fn get_active_wallpapers(state: State<'_, DbPoolWrapper>) -> Response<Vec<db
         }
     };
 
-    match schema::active::table.get_results::<db_models::Active>(&mut conn) {
+    match schema::active::table.get_results::<Active>(&mut conn) {
         Ok(v) => Response::ok(v),
         Err(e) => Response::error("Error getting wallpapers".to_string(), Some(e.to_string())),
     }

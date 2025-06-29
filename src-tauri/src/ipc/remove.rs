@@ -1,5 +1,5 @@
-use crate::database::DbPoolWrapper;
-use crate::db_models;
+use crate::database::connection::DbPoolWrapper;
+use crate::database::models::*;
 use crate::ipc::Response;
 use crate::schema;
 use diesel::prelude::*;
@@ -9,7 +9,7 @@ use tauri::State;
 pub fn remove_wallpaper_source(
     state: State<'_, DbPoolWrapper>,
     id: String,
-) -> Response<db_models::WallpaperSources> {
+) -> Response<WallpaperSources> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
         Err(e) => {

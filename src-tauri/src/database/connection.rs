@@ -1,4 +1,4 @@
-use crate::utils::get_app_data_dir;
+use crate::utils::fs::get_app_data_dir;
 use diesel::{r2d2, RunQueryDsl, SqliteConnection};
 use std::path::PathBuf;
 
