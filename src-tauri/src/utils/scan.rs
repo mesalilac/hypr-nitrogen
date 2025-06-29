@@ -1,5 +1,5 @@
 use crate::database::models::*;
-use crate::ipc::{IpcError, Response};
+use crate::ipc::Response;
 use crate::schema;
 use diesel::prelude::*;
 use diesel::result::{DatabaseErrorKind, Error as DieselError};
@@ -73,7 +73,7 @@ pub fn scan(
     conn: &mut SqliteConnection,
     id: String,
     path: String,
-) -> Result<Vec<Wallpapers>, IpcError> {
+) -> Result<Vec<Wallpapers>, String> {
     let mut wallpapers_hashmap: WallpapersHashMap = HashMap::new();
     let mut metadata: MetadataHashMap = HashMap::new();
 
@@ -154,10 +154,7 @@ pub fn scan(
                 }
             }
             Err(e) => {
-                return Err(IpcError {
-                    message: "Failed to insert wallpaper into database".to_string(),
-                    details: Some(e.to_string()),
-                });
+                return Err(e.to_string());
             }
         }
     }
@@ -165,17 +162,14 @@ pub fn scan(
     Ok(wallpapers_list)
 }
 
-pub fn scan_all(conn: &mut SqliteConnection) -> Result<Response<Vec<Wallpapers>>, IpcError> {
+pub fn scan_all(conn: &mut SqliteConnection) -> Result<Response<Vec<Wallpapers>>, String> {
     let mut wallpapers_list: Vec<Wallpapers> = Vec::new();
 
     let wallpaper_sources: Vec<WallpaperSources> =
         match schema::wallpaper_sources::table.get_results::<WallpaperSources>(conn) {
             Ok(v) => v,
             Err(e) => {
-                return Err(IpcError {
-                    message: "Failed to get wallpaper sources".to_string(),
-                    details: Some(e.to_string()),
-                });
+                return Err(e.to_string());
             }
         };
 
@@ -190,5 +184,5 @@ pub fn scan_all(conn: &mut SqliteConnection) -> Result<Response<Vec<Wallpapers>>
         }
     }
 
-    Ok(Response::ok(wallpapers_list))
+    Ok(Response::new(wallpapers_list))
 }

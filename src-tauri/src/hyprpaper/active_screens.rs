@@ -11,8 +11,8 @@ struct Monitor {
 pub fn active_screens() -> Result<Vec<String>, Error> {
     let mut screens: Vec<String> = Vec::new();
 
-    match process::Command::new("sh")
-        .args(["-c", HYPRCTL_CMD, "monitors", "-j"])
+    match process::Command::new(HYPRCTL_CMD)
+        .args(["monitors", "-j"])
         .output()
     {
         Ok(output) => {

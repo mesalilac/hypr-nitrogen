@@ -21,13 +21,8 @@ export interface Wallpapers {
     keywords: string;
 }
 
-export interface Error {
-    message: string;
-    details: string;
-}
+export type Error = string;
 
 export interface Response<T> {
-    ok: boolean;
-    data?: T;
-    error?: Error;
+    data: T;
 }

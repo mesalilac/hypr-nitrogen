@@ -11,17 +11,12 @@ use tauri::State;
 pub async fn scan_source(
     state: State<'_, DbPoolWrapper>,
     source_id: String,
-) -> Result<Response<Vec<Wallpapers>>, ()> {
+) -> Result<Response<Vec<Wallpapers>>, String> {
     use schema::wallpaper_sources::dsl::*;
 
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
-        Err(e) => {
-            return Ok(Response::error(
-                "Error getting connection".to_string(),
-                Some(e.to_string()),
-            ))
-        }
+        Err(e) => return Err(e.to_string()),
     };
 
     let wallpaper_source = match wallpaper_sources
@@ -29,20 +24,15 @@ pub async fn scan_source(
         .get_result::<WallpaperSources>(&mut conn)
     {
         Ok(v) => v,
-        Err(e) => {
-            return Ok(Response::error(
-                "Error wallpaper source not found".to_string(),
-                Some(e.to_string()),
-            ))
-        }
+        Err(e) => return Err(e.to_string()),
     };
 
     let wallpapers = match scan(&mut conn, wallpaper_source.id, wallpaper_source.path) {
         Ok(v) => v,
-        Err(e) => return Ok(Response::error(e.message, e.details)),
+        Err(e) => return Err(e),
     };
 
-    Ok(Response::ok(wallpapers))
+    Ok(Response::new(wallpapers))
 }
 
 #[tauri::command]
@@ -51,24 +41,16 @@ pub async fn scan_all_sources(
 ) -> Result<Response<Vec<Wallpapers>>, String> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
-        Err(e) => {
-            return Ok(Response::error(
-                "Error getting connection".to_string(),
-                Some(e.to_string()),
-            ))
-        }
+        Err(e) => return Err(e.to_string()),
     };
 
     if let Err(err) = diesel::delete(schema::wallpapers::table).execute(&mut conn) {
-        return Ok(Response::error(
-            "Error clearing wallpapers list".to_string(),
-            Some(err.to_string()),
-        ));
+        return Err(err.to_string());
     }
 
     match scan_all(&mut conn) {
         Ok(v) => Ok(v),
-        Err(e) => Ok(Response::error(e.message, e.details)),
+        Err(e) => Err(e),
     }
 }
 
@@ -108,16 +90,14 @@ pub fn restore(conn: &mut SqliteConnection) -> Result<bool, String> {
 }
 
 #[tauri::command]
-pub fn restore_wallpapers(state: State<'_, DbPoolWrapper>) -> Response<bool> {
+pub fn restore_wallpapers(state: State<'_, DbPoolWrapper>) -> Result<Response<bool>, String> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
-        Err(e) => {
-            return Response::error("Error getting connection".to_string(), Some(e.to_string()))
-        }
+        Err(e) => return Err(e.to_string()),
     };
 
     match restore(&mut conn) {
-        Ok(v) => Response::ok(v),
-        Err(e) => Response::error("Error restoring wallpapers".to_string(), Some(e)),
+        Ok(v) => Ok(Response::new(v)),
+        Err(e) => Err(e),
     }
 }

@@ -15,25 +15,16 @@ pub fn set_wallpaper(
     wallpaper_id: Option<String>,
     mode: String,
     is_temporary: bool,
-) -> Response<Wallpapers> {
+) -> Result<Response<Wallpapers>, String> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
-        Err(e) => {
-            return Response::error("Error getting connection".to_string(), Some(e.to_string()))
-        }
+        Err(e) => return Err(e.to_string()),
     };
 
     match hyprpaper::unload(hyprpaper::Unload::All) {
         Ok(_) => {}
-        Err(e) => {
-            return Response::error(
-                "Error unloading wallpapers".to_string(),
-                Some(e.to_string()),
-            )
-        }
+        Err(e) => return Err(e.to_string()),
     }
-
-    println!("wallpaper_id: {:#?}", wallpaper_id);
 
     let wallpaper: Option<Wallpapers> = match wallpaper_id {
         Some(id) => {
@@ -42,12 +33,7 @@ pub fn set_wallpaper(
                 .get_result::<Wallpapers>(&mut conn)
             {
                 Ok(v) => Some(v),
-                Err(e) => {
-                    return Response::error(
-                        "Error getting wallpaper".to_string(),
-                        Some(e.to_string()),
-                    )
-                }
+                Err(e) => return Err(e.to_string()),
             }
         }
         None => match schema::wallpapers::table.get_results::<Wallpapers>(&mut conn) {
@@ -55,12 +41,9 @@ pub fn set_wallpaper(
                 let mut rng = rand::rng();
                 let r = rng.random_range(0..v.len());
 
-                println!("{}", r);
                 v.get(r).cloned()
             }
-            Err(e) => {
-                return Response::error("Error getting wallpaper".to_string(), Some(e.to_string()))
-            }
+            Err(e) => return Err(e.to_string()),
         },
     };
 
@@ -83,12 +66,7 @@ pub fn set_wallpaper(
                                     ));
                                 }
                             }
-                            Err(e) => {
-                                return Response::error(
-                                    "Error getting active screens".to_string(),
-                                    Some(e.to_string()),
-                                )
-                            }
+                            Err(e) => return Err(e.to_string()),
                         }
                     } else {
                         actives_list.push(NewActive::new(
@@ -111,37 +89,28 @@ pub fn set_wallpaper(
                             .execute(&mut conn)
                         {
                             Ok(_) => {}
-                            Err(e) => {
-                                return Response::error(
-                                    "Error setting wallpaper as active".to_string(),
-                                    Some(e.to_string()),
-                                )
-                            }
+                            Err(e) => return Err(e.to_string()),
                         };
                     }
                 }
             }
-            Err(e) => {
-                return Response::error("Error setting wallpaper".to_string(), Some(e.to_string()))
-            }
+            Err(e) => return Err(e.to_string()),
         };
 
-        return Response::ok(target_wallpaper);
+        return Ok(Response::new(target_wallpaper));
     }
 
-    Response::error("Failed to set wallpaper".to_string(), None)
+    Err(String::from("Failed to set wallpaper"))
 }
 
 #[tauri::command]
 pub fn add_wallpaper_source(
     state: State<'_, DbPoolWrapper>,
     path: String,
-) -> Response<WallpaperSources> {
+) -> Result<Response<WallpaperSources>, String> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
-        Err(e) => {
-            return Response::error("Error getting connection".to_string(), Some(e.to_string()))
-        }
+        Err(e) => return Err(e.to_string()),
     };
     let wallpaper_source = NewWallpaperSource::new(path);
 
@@ -149,11 +118,8 @@ pub fn add_wallpaper_source(
         .values(&wallpaper_source)
         .get_result::<WallpaperSources>(&mut conn)
     {
-        Ok(v) => Response::ok(v),
-        Err(e) => Response::error(
-            "Error adding wallpaper source".to_string(),
-            Some(e.to_string()),
-        ),
+        Ok(v) => Ok(Response::new(v)),
+        Err(e) => Err(e.to_string()),
     }
 }
 
@@ -162,22 +128,17 @@ pub fn update_wallpaper_source_active(
     state: State<'_, DbPoolWrapper>,
     id: String,
     active: bool,
-) -> Response<WallpaperSources> {
+) -> Result<Response<WallpaperSources>, String> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
-        Err(e) => {
-            return Response::error("Error getting connection".to_string(), Some(e.to_string()))
-        }
+        Err(e) => return Err(e.to_string()),
     };
 
     match diesel::update(schema::wallpaper_sources::table.find(id))
         .set(schema::wallpaper_sources::active.eq(active))
         .get_result(&mut conn)
     {
-        Ok(v) => Response::ok(v),
-        Err(e) => Response::error(
-            "Error updating wallpaper source".to_string(),
-            Some(e.to_string()),
-        ),
+        Ok(v) => Ok(Response::new(v)),
+        Err(e) => Err(e.to_string()),
     }
 }

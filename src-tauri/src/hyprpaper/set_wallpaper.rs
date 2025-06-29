@@ -4,7 +4,7 @@ use super::{
 };
 use std::process;
 
-pub fn set_wallpaper(screen: String, wallpaper: String, mode: &Mode) -> Result<bool, Error> {
+pub fn set_wallpaper(screen: String, wallpaper: String, mode: &Mode) -> Result<(), Error> {
     let mode_string = mode.to_string();
 
     if !std::path::Path::new(&wallpaper).exists() {
@@ -30,14 +30,8 @@ pub fn set_wallpaper(screen: String, wallpaper: String, mode: &Mode) -> Result<b
     }
     wallpaper_command_value.push_str(&wallpaper);
 
-    let cmd = process::Command::new("sh")
-        .args([
-            "-c",
-            HYPRCTL_CMD,
-            HYPRPAPER_CMD,
-            "wallpaper",
-            &wallpaper_command_value,
-        ])
+    let cmd = process::Command::new(HYPRCTL_CMD)
+        .args([HYPRPAPER_CMD, "wallpaper", &wallpaper_command_value])
         .output();
 
     match cmd {
@@ -55,13 +49,13 @@ pub fn set_wallpaper(screen: String, wallpaper: String, mode: &Mode) -> Result<b
                     return Err(Error::Dispatch(DispatchErrorKind::SockConnectionFailed));
                 }
 
-                if output.status.success() && text == "Ok\n" {
-                    return Ok(true);
+                if text != "ok\n" {
+                    return Err(Error::Dispatch(DispatchErrorKind::UnExpected));
                 }
             }
         }
         Err(e) => return Err(Error::Os(e)),
     }
 
-    Ok(true)
+    Ok(())
 }

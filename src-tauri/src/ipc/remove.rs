@@ -9,12 +9,10 @@ use tauri::State;
 pub fn remove_wallpaper_source(
     state: State<'_, DbPoolWrapper>,
     id: String,
-) -> Response<WallpaperSources> {
+) -> Result<Response<WallpaperSources>, String> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
-        Err(e) => {
-            return Response::error("Error getting connection".to_string(), Some(e.to_string()))
-        }
+        Err(e) => return Err(e.to_string()),
     };
 
     match diesel::delete(
@@ -22,10 +20,7 @@ pub fn remove_wallpaper_source(
     )
     .get_result(&mut conn)
     {
-        Ok(v) => Response::ok(v),
-        Err(e) => Response::error(
-            "Error deleting wallpaper source".to_string(),
-            Some(e.to_string()),
-        ),
+        Ok(v) => Ok(Response::new(v)),
+        Err(e) => Err(e.to_string()),
     }
 }

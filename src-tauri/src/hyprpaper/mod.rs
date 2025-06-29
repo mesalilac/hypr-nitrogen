@@ -25,6 +25,7 @@ pub enum DispatchErrorKind {
     NoSuchFile,
     WallpaperNotPreloaded,
     SockConnectionFailed,
+    UnExpected,
 }
 
 impl fmt::Display for DispatchErrorKind {
@@ -37,6 +38,9 @@ impl fmt::Display for DispatchErrorKind {
             }
             Self::SockConnectionFailed => {
                 write!(f, "Sock connection failed")
+            }
+            Self::UnExpected => {
+                write!(f, "An unexpected error occurred")
             }
         }
     }

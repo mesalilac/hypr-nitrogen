@@ -31,10 +31,9 @@ function WallpaperSource(props: {
         ipc.update
             .wallpaper_source_active({ id: props.id, active: active() })
             .then((res) => {
-                if (!res.ok && res.data) {
-                } else {
-                    toast.error(res.error?.details);
-                }
+                toast.success(
+                    `Source is now ${res.data.active ? 'active' : 'inactive'}`,
+                );
             })
             .catch((e) => toast.error(e));
     }
@@ -43,11 +42,7 @@ function WallpaperSource(props: {
         ipc.remove
             .wallpaper_source({ id: props.id })
             .then((res) => {
-                if (!res.ok && res.data) {
-                    props.update_source_list_fn(props.id);
-                } else {
-                    toast.error(res.error?.details);
-                }
+                props.update_source_list_fn(res.data.id);
             })
             .catch((e) => toast.error(e));
     }
@@ -138,9 +133,7 @@ function App() {
         ipc.get
             .active_wallpapers()
             .then((res) => {
-                if (!res.ok && res.data) {
-                    setActiveWallpapers(res.data);
-                } else toast.error(res.error?.details);
+                setActiveWallpapers(res.data);
             })
             .catch((e) => toast.error(e));
     }
@@ -149,25 +142,19 @@ function App() {
         ipc.get
             .wallpapers()
             .then((res) => {
-                if (!res.ok && res.data) {
-                    setWallpapers(res.data);
-                } else toast.error(res.error?.details);
+                setWallpapers(res.data);
             })
             .catch((e) => toast.error(e));
         ipc.get
             .wallpaper_sources()
             .then((res) => {
-                if (!res.ok && res.data) {
-                    setWallpaperSources(res.data);
-                } else toast.error(res.error?.details);
+                setWallpaperSources(res.data);
             })
             .catch((e) => toast.error(e));
         ipc.get
             .screens()
             .then((res) => {
-                if (!res.ok && res.data) {
-                    setScreens(res.data);
-                } else toast.error(res.error?.details);
+                setScreens(res.data);
             })
             .catch((e) => toast.error(e));
         fetch_active_wallpapers();
@@ -186,29 +173,20 @@ function App() {
             ipc.add
                 .wallpaper_source({ path: directory })
                 .then((res) => {
-                    if (!res.ok && res.data) {
-                        setWallpaperSources([...wallpaperSources(), res.data!]);
-                        toast
-                            .promise(
-                                ipc.util.scan_source({ sourceId: res.data.id }),
-                                {
-                                    loading: 'Scanning...',
-                                    success: 'Scan complete',
-                                    error: 'Scan failed',
-                                },
-                            )
-                            .then((res2) => {
-                                if (!res2.ok && res2.data) {
-                                    setWallpapers([
-                                        ...wallpapers(),
-                                        ...res2.data,
-                                    ]);
-                                } else toast.error(res2.error?.details);
-                            })
-                            .catch((e) => toast.error(e));
-                    } else {
-                        toast.error(res.error?.details);
-                    }
+                    setWallpaperSources([...wallpaperSources(), res.data!]);
+                    toast
+                        .promise(
+                            ipc.util.scan_source({ sourceId: res.data.id }),
+                            {
+                                loading: 'Scanning...',
+                                success: 'Scan complete',
+                                error: 'Scan failed',
+                            },
+                        )
+                        .then((res2) => {
+                            setWallpapers([...wallpapers(), ...res2.data]);
+                        })
+                        .catch((e) => toast.error(e));
                 })
                 .catch((e) => {
                     toast.error(e);
@@ -230,11 +208,7 @@ function App() {
                 error: 'Scan failed',
             })
             .then((res) => {
-                if (!res.ok && res.data) {
-                    setWallpapers(res.data);
-                } else {
-                    toast.error(res.error?.details);
-                }
+                setWallpapers(res.data);
             })
             .catch((e) => toast.error(e))
             .finally(() => setScanButtonActive(true));
@@ -263,12 +237,8 @@ function App() {
                         error: 'Failed to set wallpaper',
                     },
                 )
-                .then((res) => {
-                    if (!res.ok && res.data) {
-                        fetch_active_wallpapers();
-                    } else {
-                        toast.error(res.error?.details);
-                    }
+                .then(() => {
+                    fetch_active_wallpapers();
                 })
                 .catch((e) => toast.error(e));
         }
@@ -287,11 +257,8 @@ function App() {
                 success: 'Wallpapers restored',
                 error: 'Failed to restore wallpapers',
             })
-            .then((res) => {
-                if (!res.ok && res.data) {
-                } else {
-                    toast.error(res.error?.details);
-                }
+            .then(() => {
+                toast.success('Restored wallpapers');
             })
             .catch((e) => toast.error(e));
     }

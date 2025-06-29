@@ -3,9 +3,9 @@ use super::{
 };
 use std::process;
 
-pub fn preload(wallpaper: String) -> Result<bool, Error> {
-    match process::Command::new("sh")
-        .args(["-c", HYPRCTL_CMD, HYPRPAPER_CMD, "preload", &wallpaper])
+pub fn preload(wallpaper: String) -> Result<(), Error> {
+    match process::Command::new(HYPRCTL_CMD)
+        .args([HYPRPAPER_CMD, "preload", &wallpaper])
         .output()
     {
         Ok(output) => {
@@ -16,13 +16,13 @@ pub fn preload(wallpaper: String) -> Result<bool, Error> {
                     return Err(Error::Dispatch(DispatchErrorKind::NoSuchFile));
                 }
 
-                if output.status.success() && text == "Ok\n" {
-                    return Ok(true);
+                if text != "ok\n" {
+                    return Err(Error::Dispatch(DispatchErrorKind::UnExpected));
                 }
             }
         }
         Err(e) => return Err(Error::Os(e)),
     }
 
-    Ok(true)
+    Ok(())
 }
