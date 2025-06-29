@@ -240,15 +240,20 @@ function App() {
             .finally(() => setScanButtonActive(true));
     }
 
-    function setWallpaper(isTemporary: boolean) {
+    function setWallpaper(isTemporary: boolean, random_wallpaper: boolean) {
         const selected_wallpaper = selectedWallpaper();
 
-        if (selected_wallpaper && selected_wallpaper !== undefined) {
+        if (
+            (selected_wallpaper && selected_wallpaper !== undefined) ||
+            random_wallpaper
+        ) {
             toast
                 .promise(
                     ipc.set.wallpaper({
                         screen: selectedScreen(),
-                        wallpaperId: selected_wallpaper,
+                        wallpaperId: random_wallpaper
+                            ? undefined
+                            : selected_wallpaper,
                         mode: selectedMode(),
                         isTemporary: isTemporary,
                     }),
@@ -272,7 +277,7 @@ function App() {
     function handleThumbnailClick(id: string) {
         setSelectedWallpaper(id);
 
-        setWallpaper(true);
+        setWallpaper(true, false);
     }
 
     function restoreWallpapers() {
@@ -330,6 +335,9 @@ function App() {
                 </div>
                 <span>{filteredItems().length} wallpapers</span>
                 <div class='header-right'>
+                    <button onClick={() => setWallpaper(false, true)}>
+                        Random
+                    </button>
                     <button onClick={restoreWallpapers}>Restore</button>
                     <button disabled={!scanButtonActive()} onClick={scanAll}>
                         Scan
@@ -337,7 +345,9 @@ function App() {
                     <button onClick={() => setShowSettings(true)}>
                         Settings
                     </button>
-                    <button onClick={() => setWallpaper(false)}>Save</button>
+                    <button onClick={() => setWallpaper(false, false)}>
+                        Save
+                    </button>
                 </div>
             </div>
             <div class='preview-list'>

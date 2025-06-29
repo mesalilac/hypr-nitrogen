@@ -3,13 +3,14 @@ use crate::ipc::Response;
 use crate::{db_models, schema, DbPoolWrapper};
 use diesel::prelude::*;
 use diesel::upsert::excluded;
+use rand::Rng;
 use tauri::State;
 
 #[tauri::command]
 pub fn set_wallpaper(
     state: State<'_, DbPoolWrapper>,
     screen: String,
-    wallpaper_id: String,
+    wallpaper_id: Option<String>,
     mode: String,
     is_temporary: bool,
 ) -> Response<db_models::Wallpapers> {
@@ -30,78 +31,103 @@ pub fn set_wallpaper(
         }
     }
 
-    let wallpaper = match schema::wallpapers::table
-        .filter(schema::wallpapers::id.eq(&wallpaper_id))
-        .get_result::<db_models::Wallpapers>(&mut conn)
-    {
-        Ok(v) => v,
-        Err(e) => {
-            return Response::error("Error getting wallpaper".to_string(), Some(e.to_string()))
-        }
-    };
+    println!("wallpaper_id: {:#?}", wallpaper_id);
 
-    let h_mode = hyprpaper::Mode::from_string(mode);
-
-    match hyprpaper::set_wallpaper(screen.clone(), wallpaper.path.clone(), &h_mode) {
-        Ok(_) => {
-            if !is_temporary {
-                let mut actives_list: Vec<db_models::NewActive> = Vec::new();
-
-                if screen == "all" {
-                    match hyprpaper::active_screens() {
-                        Ok(v) => {
-                            for a in v {
-                                actives_list.push(db_models::NewActive::new(
-                                    a,
-                                    wallpaper_id.clone(),
-                                    h_mode.to_string(),
-                                ));
-                            }
-                        }
-                        Err(e) => {
-                            return Response::error(
-                                "Error getting active screens".to_string(),
-                                Some(e.to_string()),
-                            )
-                        }
-                    }
-                } else {
-                    actives_list.push(db_models::NewActive::new(
-                        screen,
-                        wallpaper_id.clone(),
-                        h_mode.to_string(),
-                    ));
-                }
-
-                for active in actives_list {
-                    match diesel::insert_into(schema::active::table)
-                        .values(&active)
-                        .on_conflict(schema::active::dsl::screen)
-                        .do_update()
-                        .set((
-                            schema::active::dsl::wallpaper_id
-                                .eq(excluded(schema::active::dsl::wallpaper_id)),
-                            schema::active::dsl::mode.eq(excluded(schema::active::dsl::mode)),
-                        ))
-                        .execute(&mut conn)
-                    {
-                        Ok(_) => {}
-                        Err(e) => {
-                            return Response::error(
-                                "Error setting wallpaper as active".to_string(),
-                                Some(e.to_string()),
-                            )
-                        }
-                    };
+    let wallpaper: Option<db_models::Wallpapers> = match wallpaper_id {
+        Some(id) => {
+            match schema::wallpapers::table
+                .filter(schema::wallpapers::id.eq(&id))
+                .get_result::<db_models::Wallpapers>(&mut conn)
+            {
+                Ok(v) => Some(v),
+                Err(e) => {
+                    return Response::error(
+                        "Error getting wallpaper".to_string(),
+                        Some(e.to_string()),
+                    )
                 }
             }
         }
-        Err(e) => {
-            return Response::error("Error setting wallpaper".to_string(), Some(e.to_string()))
-        }
+        None => match schema::wallpapers::table.get_results::<db_models::Wallpapers>(&mut conn) {
+            Ok(v) => {
+                let mut rng = rand::rng();
+                let r = rng.random_range(0..v.len());
+
+                println!("{}", r);
+                v.get(r).cloned()
+            }
+            Err(e) => {
+                return Response::error("Error getting wallpaper".to_string(), Some(e.to_string()))
+            }
+        },
     };
 
-    Response::ok(wallpaper)
+    if let Some(target_wallpaper) = wallpaper {
+        let h_mode = hyprpaper::Mode::from_string(mode);
+
+        match hyprpaper::set_wallpaper(screen.clone(), target_wallpaper.path.clone(), &h_mode) {
+            Ok(_) => {
+                if !is_temporary {
+                    let mut actives_list: Vec<db_models::NewActive> = Vec::new();
+
+                    if screen == "all" {
+                        match hyprpaper::active_screens() {
+                            Ok(v) => {
+                                for a in v {
+                                    actives_list.push(db_models::NewActive::new(
+                                        a,
+                                        target_wallpaper.id.clone(),
+                                        h_mode.to_string(),
+                                    ));
+                                }
+                            }
+                            Err(e) => {
+                                return Response::error(
+                                    "Error getting active screens".to_string(),
+                                    Some(e.to_string()),
+                                )
+                            }
+                        }
+                    } else {
+                        actives_list.push(db_models::NewActive::new(
+                            screen,
+                            target_wallpaper.id.clone(),
+                            h_mode.to_string(),
+                        ));
+                    }
+
+                    for active in actives_list {
+                        match diesel::insert_into(schema::active::table)
+                            .values(&active)
+                            .on_conflict(schema::active::dsl::screen)
+                            .do_update()
+                            .set((
+                                schema::active::dsl::wallpaper_id
+                                    .eq(excluded(schema::active::dsl::wallpaper_id)),
+                                schema::active::dsl::mode.eq(excluded(schema::active::dsl::mode)),
+                            ))
+                            .execute(&mut conn)
+                        {
+                            Ok(_) => {}
+                            Err(e) => {
+                                return Response::error(
+                                    "Error setting wallpaper as active".to_string(),
+                                    Some(e.to_string()),
+                                )
+                            }
+                        };
+                    }
+                }
+            }
+            Err(e) => {
+                return Response::error("Error setting wallpaper".to_string(), Some(e.to_string()))
+            }
+        };
+
+        return Response::ok(target_wallpaper);
+    }
+
+    Response::error("Failed to set wallpaper".to_string(), None)
 }
 
 #[tauri::command]

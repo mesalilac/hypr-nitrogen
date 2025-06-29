@@ -6,7 +6,7 @@ export { types };
 export const set = {
     wallpaper(props: {
         screen: string;
-        wallpaperId: string;
+        wallpaperId: string | undefined;
         mode: types.Mode;
         isTemporary: boolean;
     }): Promise<types.Response<types.Active>> {
