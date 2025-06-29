@@ -376,10 +376,7 @@ function App() {
                         <div class='wallpaper-sources-list'>
                             <button onClick={addSource}>Add source</button>
                             <div>
-                                <For
-                                    each={wallpaperSources()}
-                                    fallback={<div>Loading...</div>}
-                                >
+                                <For each={wallpaperSources()}>
                                     {(x) => (
                                         <WallpaperSource
                                             id={x.id}
@@ -391,6 +388,16 @@ function App() {
                                         />
                                     )}
                                 </For>
+                                <Switch>
+                                    <Match
+                                        when={wallpaperSources().length === 0}
+                                    >
+                                        <div>
+                                            No wallpaper sources found. Add a
+                                            source.
+                                        </div>
+                                    </Match>
+                                </Switch>
                             </div>
                         </div>
                         <button
