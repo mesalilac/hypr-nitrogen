@@ -293,7 +293,7 @@ function App() {
 
     return (
         <main class='container'>
-            <Toaster />
+            <Toaster position='bottom-right' />
             <div class='header'>
                 <div>
                     <input
