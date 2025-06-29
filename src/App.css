@@ -39,13 +39,13 @@
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
     gap: 1rem;
     padding-top: 2rem;
-}
 
-.preview-list>div {
-    margin: 5px;
-    padding: 10px;
-    text-overflow: ellipsis;
-    overflow: hidden;
+    & div {
+        margin: 5px;
+        padding: 10px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
 }
 
 .preview-image {

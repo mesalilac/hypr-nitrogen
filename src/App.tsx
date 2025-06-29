@@ -53,10 +53,10 @@ function WallpaperSource(props: {
     }
 
     return (
-        <div class="wallpaper-source-item">
+        <div class='wallpaper-source-item'>
             <div>
                 <input
-                    type="checkbox"
+                    type='checkbox'
                     checked={active()}
                     onChange={(e) =>
                         handleCheckboxChange(e.currentTarget.checked)
@@ -81,7 +81,7 @@ function WallpaperPreview(props: {
                 id={props.is_selected ? 'wallpaper-preview-selected' : ''}
                 class={`preview-image ${props.is_active ? 'wallpaper-preview-active' : ''}`}
                 src={convertFileSrc(props.wallpaper.path)}
-                loading="lazy"
+                loading='lazy'
                 onError={(e) => (e.currentTarget.src = fallbackImage)}
             />
         </div>
@@ -97,7 +97,7 @@ function App() {
         ipc.types.WallpaperSources[]
     >([]);
     const [wallpapers, setWallpapers] = createSignal<ipc.types.Wallpapers[]>(
-        []
+        [],
     );
     const [screens, setScreens] = createSignal<string[]>();
     const [selectedScreen, setSelectedScreen] = createSignal<string>('all');
@@ -112,7 +112,7 @@ function App() {
 
     const debouncedPerformSearch = debounce(
         (query: string) => setDebouncedSearchQuery(query),
-        300
+        300,
     );
 
     function handleSearchChange(e: Event) {
@@ -130,7 +130,7 @@ function App() {
         }
 
         return wallpapers().filter((item) =>
-            item.keywords.toLowerCase().includes(query)
+            item.keywords.toLowerCase().includes(query),
         );
     });
 
@@ -195,7 +195,7 @@ function App() {
                                     loading: 'Scanning...',
                                     success: 'Scan complete',
                                     error: 'Scan failed',
-                                }
+                                },
                             )
                             .then((res2) => {
                                 if (!res2.ok && res2.data) {
@@ -256,7 +256,7 @@ function App() {
                         loading: 'Setting wallpaper...',
                         success: 'Wallpaper set',
                         error: 'Failed to set wallpaper',
-                    }
+                    },
                 )
                 .then((res) => {
                     if (!res.ok && res.data) {
@@ -292,24 +292,24 @@ function App() {
     }
 
     return (
-        <main class="container">
+        <main class='container'>
             <Toaster />
-            <div class="header">
+            <div class='header'>
                 <div>
                     <input
-                        type="text"
-                        placeholder="Search..."
+                        type='text'
+                        placeholder='Search...'
                         value={searchQuery()}
                         onInput={handleSearchChange}
                     />
                     <select
                         onInput={(e) =>
                             setSelectedScreen(
-                                (e.target as HTMLSelectElement).value
+                                (e.target as HTMLSelectElement).value,
                             )
                         }
                     >
-                        <option value="all">all</option>
+                        <option value='all'>all</option>
                         <For each={screens()}>
                             {(x) => <option value={x}>{x}</option>}
                         </For>
@@ -318,7 +318,7 @@ function App() {
                         onInput={(e) =>
                             setSelectedMode(
                                 (e.target as HTMLSelectElement)
-                                    .value as ipc.types.Mode
+                                    .value as ipc.types.Mode,
                             )
                         }
                     >
@@ -328,7 +328,7 @@ function App() {
                     </select>
                 </div>
                 <span>{filteredItems().length} wallpapers</span>
-                <div class="header-right">
+                <div class='header-right'>
                     <button onClick={restoreWallpapers}>Restore</button>
                     <button disabled={!scanButtonActive()} onClick={scanAll}>
                         Scan
@@ -339,7 +339,7 @@ function App() {
                     <button onClick={() => setWallpaper(false)}>Apply</button>
                 </div>
             </div>
-            <div class="preview-list">
+            <div class='preview-list'>
                 <For each={filteredItems()}>
                     {(x) => {
                         return (
@@ -348,7 +348,7 @@ function App() {
                                     (y) =>
                                         y.wallpaper_id === x.id &&
                                         (y.screen === selectedScreen() ||
-                                            selectedScreen() === 'all')
+                                            selectedScreen() === 'all'),
                                 )}
                                 is_selected={x.id === selectedWallpaper()}
                                 wallpaper={x}
@@ -371,9 +371,9 @@ function App() {
                 </Switch>
             </div>
             <Show when={showSettings()}>
-                <div class="settings-container">
-                    <div class="settings">
-                        <div class="wallpaper-sources-list">
+                <div class='settings-container'>
+                    <div class='settings'>
+                        <div class='wallpaper-sources-list'>
                             <button onClick={addSource}>Add source</button>
                             <div>
                                 <For
@@ -394,7 +394,7 @@ function App() {
                             </div>
                         </div>
                         <button
-                            class="settings-close-btn"
+                            class='settings-close-btn'
                             onClick={() => setShowSettings(false)}
                         >
                             Close
