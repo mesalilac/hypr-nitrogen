@@ -12,7 +12,6 @@ use walkdir::WalkDir;
 #[derive(Deserialize, Clone, Debug)]
 pub struct WallpaperMetadata {
     pub signature: String,
-    pub file_path: String,
     pub caption: String,
     pub category: String,
     pub tags: Vec<String>,
