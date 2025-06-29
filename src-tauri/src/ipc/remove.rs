@@ -1,6 +1,7 @@
+use crate::database::DbPoolWrapper;
+use crate::db_models;
 use crate::ipc::Response;
 use crate::schema;
-use crate::{db_models, DbPoolWrapper};
 use diesel::prelude::*;
 use tauri::State;
 

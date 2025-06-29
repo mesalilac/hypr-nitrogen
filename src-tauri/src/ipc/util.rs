@@ -1,7 +1,8 @@
+use crate::database::DbPoolWrapper;
 use crate::hyprpaper;
 use crate::ipc::Response;
 use crate::scan::{scan, scan_all};
-use crate::{db_models, schema, DbPoolWrapper};
+use crate::{db_models, schema};
 use diesel::prelude::*;
 use tauri::State;
 
