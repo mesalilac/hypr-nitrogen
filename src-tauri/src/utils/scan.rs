@@ -9,7 +9,7 @@ use image::{ImageFormat, ImageReader};
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::ffi::OsStr;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
 #[derive(Deserialize, Clone, Debug)]
@@ -73,7 +73,7 @@ fn keywords_from_file_name(file_name: &OsStr) -> String {
     parts.join(" ")
 }
 
-fn generate_thumbnail(signature: &str, target_image: &Path) -> Result<String, ()> {
+fn create_thumbnail_path(signature: &str) -> String {
     let mut thumbnail_path = get_cache_dir();
     thumbnail_path.push("thumbnails");
 
@@ -81,12 +81,13 @@ fn generate_thumbnail(signature: &str, target_image: &Path) -> Result<String, ()
         if let Err(e) = std::fs::create_dir(&thumbnail_path) {
             eprintln!("Failed to create thumbnails dir: {}", e);
         }
-
-        return Err(());
     }
 
     thumbnail_path.push(format!("{}.webp", signature));
+    thumbnail_path.to_string_lossy().to_string()
+}
 
+fn generate_thumbnail(thumbnail_path: &Path, target_image: &Path) -> Result<String, ()> {
     if thumbnail_path.exists() {
         return Ok(thumbnail_path.to_string_lossy().to_string());
     }
@@ -112,6 +113,7 @@ pub fn scan(
 ) -> Result<Vec<Wallpaper>, String> {
     let mut wallpapers_hashmap: WallpapersHashMap = HashMap::new();
     let mut metadata: MetadataHashMap = HashMap::new();
+    let mut thumbnail_generation_list: Vec<(PathBuf, PathBuf)> = Vec::new();
 
     for entry in WalkDir::new(source_path)
         .into_iter()
@@ -126,12 +128,10 @@ pub fn scan(
             Some(ext) => {
                 if is_image_extension(ext) {
                     if let Some(signature) = generate_signature(entry.path()) {
-                        // If thumbnail generation failed fallback to the wallpaper it self
-                        let thumbnail_path: String =
-                            match generate_thumbnail(&signature, &entry.path()) {
-                                Ok(t) => t,
-                                Err(_) => entry.path().to_string_lossy().to_string(),
-                            };
+                        let thumbnail_path: String = create_thumbnail_path(&signature);
+
+                        thumbnail_generation_list
+                            .push((PathBuf::from(entry.path()), PathBuf::from(&thumbnail_path)));
 
                         let new_wallpaper = NewWallpaper::new(
                             signature.clone(),
@@ -202,6 +202,19 @@ pub fn scan(
             }
         }
     }
+
+    std::thread::spawn(|| {
+        for (target_image_path, thumbnail_path) in thumbnail_generation_list {
+            match generate_thumbnail(&thumbnail_path, &target_image_path) {
+                Ok(thumbnail_path) => {
+                    println!("Thumbnail generated: '{}'", thumbnail_path);
+                }
+                Err(_) => {
+                    continue;
+                }
+            }
+        }
+    });
 
     Ok(wallpapers_list)
 }
