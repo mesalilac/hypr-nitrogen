@@ -42,7 +42,7 @@ function ThumbnailsList(props: Props) {
     }
 
     return (
-        <div class='preview-list'>
+        <div class='thumbnails-list'>
             <For each={props.filteredItems()}>
                 {(x) => {
                     return (

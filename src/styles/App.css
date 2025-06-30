@@ -34,7 +34,7 @@
     gap: 1rem;
 }
 
-.preview-list {
+.thumbnails-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
     gap: 1rem;
@@ -48,7 +48,7 @@
     }
 }
 
-.preview-image {
+.thumbnail {
     width: 400px;
     height: 200px;
     object-fit: cover;
@@ -56,11 +56,11 @@
     cursor: pointer;
 }
 
-#wallpaper-preview-selected {
+#thumbnail-selected {
     border: 8px solid #224da5ff;
 }
 
-.wallpaper-preview-active {
+.thumbnail-active {
     border: 8px solid #229664ff;
 }
 

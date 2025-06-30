@@ -13,8 +13,8 @@ function Thumbnail(props: Props) {
     return (
         <div onClick={props.onClick}>
             <img
-                id={props.is_selected ? 'wallpaper-preview-selected' : ''}
-                class={`preview-image ${props.is_active ? 'wallpaper-preview-active' : ''}`}
+                id={props.is_selected ? 'thumbnail-selected' : ''}
+                class={`thumbnail ${props.is_active ? 'thumbnail-active' : ''}`}
                 src={convertFileSrc(props.wallpaper.path)}
                 loading='lazy'
                 onError={(e) => (e.currentTarget.src = fallbackImage)}
