@@ -7,7 +7,7 @@ import {
     onCleanup,
 } from 'solid-js';
 import { debounce } from '@solid-primitives/scheduled';
-import * as ipc from '../../ipc';
+import * as ipc from '@ipc';
 import toast from 'solid-toast';
 
 interface Props {

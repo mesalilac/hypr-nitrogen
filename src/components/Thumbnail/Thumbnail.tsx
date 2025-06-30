@@ -1,6 +1,6 @@
 import { convertFileSrc } from '@tauri-apps/api/core';
-import fallbackImage from '../../assets/fallback-image.svg';
-import * as ipc from '../../ipc';
+import fallbackImage from '@assets/fallback-image.svg';
+import * as ipc from '@ipc';
 
 interface Props {
     wallpaper: ipc.types.Wallpaper;

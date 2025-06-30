@@ -1,7 +1,7 @@
 import { For, Switch, Match, Accessor, Setter } from 'solid-js';
 import toast from 'solid-toast';
-import * as ipc from '../../ipc';
-import Thumbnail from '../Thumbnail';
+import * as ipc from '@ipc';
+import Thumbnail from '@components/Thumbnail';
 
 interface Props {
     activeWallpapers: Accessor<ipc.types.Active[]>;

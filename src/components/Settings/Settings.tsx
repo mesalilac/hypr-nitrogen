@@ -1,4 +1,4 @@
-import * as ipc from '../../ipc';
+import * as ipc from '@ipc';
 import {
     Match,
     Switch,
@@ -10,7 +10,7 @@ import {
 } from 'solid-js';
 import { open } from '@tauri-apps/plugin-dialog';
 import toast from 'solid-toast';
-import WallpaperSource from '../WallpaperSource';
+import WallpaperSource from '@components/WallpaperSource';
 
 interface Props {
     setShowSettings: Setter<boolean>;

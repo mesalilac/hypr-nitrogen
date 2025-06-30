@@ -1,10 +1,10 @@
 import { createSignal, Show, onMount, createMemo } from 'solid-js';
 import toast, { Toaster } from 'solid-toast';
-import Settings from './components/Settings';
-import Header from './components/Header';
-import ThumbnailsList from './components/ThumbnailsList';
-import * as ipc from './ipc';
-import './App.css';
+import Settings from '@components/Settings';
+import Header from '@components/Header';
+import ThumbnailsList from '@components/ThumbnailsList';
+import * as ipc from '@ipc';
+import '@styles/App.css';
 
 function App() {
     const [selectedScreen, setSelectedScreen] = createSignal<string>('all');
