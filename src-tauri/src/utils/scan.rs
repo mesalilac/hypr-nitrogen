@@ -89,7 +89,7 @@ fn create_thumbnail_path(signature: &str) -> String {
 
 fn generate_thumbnail(thumbnail_path: &Path, target_image: &Path) -> Result<String, ()> {
     if thumbnail_path.exists() {
-        return Ok(thumbnail_path.to_string_lossy().to_string());
+        return Err(());
     }
 
     if let Ok(image) = ImageReader::open(target_image) {
