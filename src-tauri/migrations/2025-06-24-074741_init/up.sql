@@ -7,8 +7,9 @@ CREATE TABLE wallpaper_sources (
 
 CREATE TABLE wallpapers (
     id TEXT NOT NULL PRIMARY KEY,       -- wallpaper ID (nanoid)
-    signature TEXT NOT NULL UNIQUE,            -- signature (blake3 hash)
+    signature TEXT NOT NULL UNIQUE,     -- signature (blake3 hash)
     path TEXT NOT NULL,                 -- path to image file
+    thumbnail_path TEXT NOT NULL,       -- path to thumbnail file
     resolution TEXT,                    -- e.g., "3840x2160"
     wallpaper_source_id TEXT NOT NULL REFERENCES wallpaper_sources(id) ON DELETE CASCADE,
     keywords TEXT                           -- space-separated category/tags

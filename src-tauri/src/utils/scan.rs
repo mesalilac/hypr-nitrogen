@@ -1,8 +1,11 @@
 use crate::database::models::*;
 use crate::ipc::Response;
 use crate::schema;
+use crate::utils::fs::get_cache_dir;
 use diesel::prelude::*;
 use diesel::result::{DatabaseErrorKind, Error as DieselError};
+use image::imageops::thumbnail;
+use image::{ImageFormat, ImageReader};
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::ffi::OsStr;
@@ -70,6 +73,38 @@ fn keywords_from_file_name(file_name: &OsStr) -> String {
     parts.join(" ")
 }
 
+fn generate_thumbnail(signature: &str, target_image: &Path) -> Result<String, ()> {
+    let mut thumbnail_path = get_cache_dir();
+    thumbnail_path.push("thumbnails");
+
+    if !thumbnail_path.exists() {
+        if let Err(e) = std::fs::create_dir(&thumbnail_path) {
+            eprintln!("Failed to create thumbnails dir: {}", e);
+        }
+
+        return Err(());
+    }
+
+    thumbnail_path.push(format!("{}.webp", signature));
+
+    if thumbnail_path.exists() {
+        return Ok(thumbnail_path.to_string_lossy().to_string());
+    }
+
+    if let Ok(image) = ImageReader::open(target_image) {
+        if let Ok(decoded_image) = image.decode() {
+            let new_image = thumbnail(&decoded_image, 400, 200);
+
+            match new_image.save_with_format(&thumbnail_path, ImageFormat::WebP) {
+                Ok(_) => return Ok(thumbnail_path.to_string_lossy().to_string()),
+                Err(_) => return Err(()),
+            }
+        }
+    }
+
+    Err(())
+}
+
 pub fn scan(
     conn: &mut SqliteConnection,
     source_id: String,
@@ -91,9 +126,17 @@ pub fn scan(
             Some(ext) => {
                 if is_image_extension(ext) {
                     if let Some(signature) = generate_signature(entry.path()) {
+                        // If thumbnail generation failed fallback to the wallpaper it self
+                        let thumbnail_path: String =
+                            match generate_thumbnail(&signature, &entry.path()) {
+                                Ok(t) => t,
+                                Err(_) => entry.path().to_string_lossy().to_string(),
+                            };
+
                         let new_wallpaper = NewWallpaper::new(
                             signature.clone(),
                             entry.path().to_string_lossy().to_string(),
+                            thumbnail_path,
                             None, // TODO: Extract resolution
                             source_id.clone(),
                             None,

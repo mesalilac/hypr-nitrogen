@@ -21,6 +21,7 @@ diesel::table! {
         id -> Text,
         signature -> Text,
         path -> Text,
+        thumbnail_path -> Text,
         resolution -> Nullable<Text>,
         wallpaper_source_id -> Text,
         keywords -> Nullable<Text>,

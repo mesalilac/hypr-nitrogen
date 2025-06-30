@@ -16,6 +16,7 @@ export interface Wallpaper {
     id: string;
     signature: string;
     path: string;
+    thumbnail_path: string;
     resolution: string;
     wallpaper_source_id: string;
     keywords: string;
