@@ -1,6 +1,7 @@
 use crate::APP_NAME;
 use std::path::PathBuf;
 
+#[allow(dead_code)]
 pub fn get_cache_dir() -> PathBuf {
     let cache_dir = directories::BaseDirs::new()
         .expect("Failed to get base dir")
@@ -27,6 +28,7 @@ pub fn get_app_data_dir() -> PathBuf {
     app_data_dir
 }
 
+#[allow(dead_code)]
 pub fn get_config_dir() -> PathBuf {
     let config_dir = directories::BaseDirs::new()
         .expect("Failed to get base dir")
