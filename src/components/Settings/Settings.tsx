@@ -10,7 +10,6 @@ import {
 } from 'solid-js';
 import { open } from '@tauri-apps/plugin-dialog';
 import toast from 'solid-toast';
-import './Settings.css';
 import WallpaperSource from '../WallpaperSource';
 
 interface Props {
