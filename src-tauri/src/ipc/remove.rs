@@ -9,7 +9,7 @@ use tauri::State;
 pub fn remove_wallpaper_source(
     state: State<'_, DbPoolWrapper>,
     id: String,
-) -> Result<Response<WallpaperSources>, String> {
+) -> Result<Response<WallpaperSource>, String> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
         Err(e) => return Err(e.to_string()),

@@ -73,7 +73,7 @@ pub fn scan(
     conn: &mut SqliteConnection,
     id: String,
     path: String,
-) -> Result<Vec<Wallpapers>, String> {
+) -> Result<Vec<Wallpaper>, String> {
     let mut wallpapers_hashmap: WallpapersHashMap = HashMap::new();
     let mut metadata: MetadataHashMap = HashMap::new();
 
@@ -138,12 +138,12 @@ pub fn scan(
         }
     });
 
-    let mut wallpapers_list: Vec<Wallpapers> = Vec::new();
+    let mut wallpapers_list: Vec<Wallpaper> = Vec::new();
 
     for w in wallpapers_hashmap.values() {
         match diesel::insert_into(schema::wallpapers::table)
             .values(w)
-            .get_result::<Wallpapers>(conn)
+            .get_result::<Wallpaper>(conn)
         {
             Ok(v) => {
                 wallpapers_list.push(v);
@@ -162,11 +162,11 @@ pub fn scan(
     Ok(wallpapers_list)
 }
 
-pub fn scan_all(conn: &mut SqliteConnection) -> Result<Response<Vec<Wallpapers>>, String> {
-    let mut wallpapers_list: Vec<Wallpapers> = Vec::new();
+pub fn scan_all(conn: &mut SqliteConnection) -> Result<Response<Vec<Wallpaper>>, String> {
+    let mut wallpapers_list: Vec<Wallpaper> = Vec::new();
 
-    let wallpaper_sources: Vec<WallpaperSources> =
-        match schema::wallpaper_sources::table.get_results::<WallpaperSources>(conn) {
+    let wallpaper_sources: Vec<WallpaperSource> =
+        match schema::wallpaper_sources::table.get_results::<WallpaperSource>(conn) {
             Ok(v) => v,
             Err(e) => {
                 return Err(e.to_string());

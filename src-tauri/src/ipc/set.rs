@@ -15,7 +15,7 @@ pub fn set_wallpaper(
     wallpaper_id: Option<String>,
     mode: String,
     is_temporary: bool,
-) -> Result<Response<Wallpapers>, String> {
+) -> Result<Response<Wallpaper>, String> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
         Err(e) => return Err(e.to_string()),
@@ -26,17 +26,17 @@ pub fn set_wallpaper(
         Err(e) => return Err(e.to_string()),
     }
 
-    let wallpaper: Option<Wallpapers> = match wallpaper_id {
+    let wallpaper: Option<Wallpaper> = match wallpaper_id {
         Some(id) => {
             match schema::wallpapers::table
                 .filter(schema::wallpapers::id.eq(&id))
-                .get_result::<Wallpapers>(&mut conn)
+                .get_result::<Wallpaper>(&mut conn)
             {
                 Ok(v) => Some(v),
                 Err(e) => return Err(e.to_string()),
             }
         }
-        None => match schema::wallpapers::table.get_results::<Wallpapers>(&mut conn) {
+        None => match schema::wallpapers::table.get_results::<Wallpaper>(&mut conn) {
             Ok(v) => {
                 let mut rng = rand::rng();
                 let r = rng.random_range(0..v.len());
@@ -107,7 +107,7 @@ pub fn set_wallpaper(
 pub fn add_wallpaper_source(
     state: State<'_, DbPoolWrapper>,
     path: String,
-) -> Result<Response<WallpaperSources>, String> {
+) -> Result<Response<WallpaperSource>, String> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
         Err(e) => return Err(e.to_string()),
@@ -116,7 +116,7 @@ pub fn add_wallpaper_source(
 
     match diesel::insert_into(schema::wallpaper_sources::table)
         .values(&wallpaper_source)
-        .get_result::<WallpaperSources>(&mut conn)
+        .get_result::<WallpaperSource>(&mut conn)
     {
         Ok(v) => Ok(Response::new(v)),
         Err(e) => Err(e.to_string()),
@@ -128,7 +128,7 @@ pub fn update_wallpaper_source_active(
     state: State<'_, DbPoolWrapper>,
     id: String,
     active: bool,
-) -> Result<Response<WallpaperSources>, String> {
+) -> Result<Response<WallpaperSource>, String> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
         Err(e) => return Err(e.to_string()),

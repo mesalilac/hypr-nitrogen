@@ -6,13 +6,13 @@ export interface Active {
     mode: Mode;
 }
 
-export interface WallpaperSources {
+export interface WallpaperSource {
     id: string;
     path: string;
     active: boolean;
 }
 
-export interface Wallpapers {
+export interface Wallpaper {
     id: string;
     signature: string;
     path: string;

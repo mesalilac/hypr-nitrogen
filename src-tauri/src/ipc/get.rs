@@ -18,28 +18,26 @@ pub fn get_screens() -> Result<Response<Vec<String>>, String> {
 #[tauri::command]
 pub fn get_wallpaper_sources(
     state: State<'_, DbPoolWrapper>,
-) -> Result<Response<Vec<WallpaperSources>>, String> {
+) -> Result<Response<Vec<WallpaperSource>>, String> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
         Err(e) => return Err(e.to_string()),
     };
 
-    match schema::wallpaper_sources::table.get_results::<WallpaperSources>(&mut conn) {
+    match schema::wallpaper_sources::table.get_results::<WallpaperSource>(&mut conn) {
         Ok(v) => Ok(Response::new(v)),
         Err(e) => Err(e.to_string()),
     }
 }
 
 #[tauri::command]
-pub fn get_wallpapers(
-    state: State<'_, DbPoolWrapper>,
-) -> Result<Response<Vec<Wallpapers>>, String> {
+pub fn get_wallpapers(state: State<'_, DbPoolWrapper>) -> Result<Response<Vec<Wallpaper>>, String> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
         Err(e) => return Err(e.to_string()),
     };
 
-    match schema::wallpapers::table.get_results::<Wallpapers>(&mut conn) {
+    match schema::wallpapers::table.get_results::<Wallpaper>(&mut conn) {
         Ok(v) => Ok(Response::new(v)),
         Err(e) => Err(e.to_string()),
     }

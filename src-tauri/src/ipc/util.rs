@@ -11,7 +11,7 @@ use tauri::State;
 pub async fn scan_source(
     state: State<'_, DbPoolWrapper>,
     source_id: String,
-) -> Result<Response<Vec<Wallpapers>>, String> {
+) -> Result<Response<Vec<Wallpaper>>, String> {
     use schema::wallpaper_sources::dsl::*;
 
     let mut conn = match state.pool.get() {
@@ -21,7 +21,7 @@ pub async fn scan_source(
 
     let wallpaper_source = match wallpaper_sources
         .find(source_id)
-        .get_result::<WallpaperSources>(&mut conn)
+        .get_result::<WallpaperSource>(&mut conn)
     {
         Ok(v) => v,
         Err(e) => return Err(e.to_string()),
@@ -38,7 +38,7 @@ pub async fn scan_source(
 #[tauri::command]
 pub async fn scan_all_sources(
     state: State<'_, DbPoolWrapper>,
-) -> Result<Response<Vec<Wallpapers>>, String> {
+) -> Result<Response<Vec<Wallpaper>>, String> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
         Err(e) => return Err(e.to_string()),
@@ -63,7 +63,7 @@ pub fn restore(conn: &mut SqliteConnection) -> Result<bool, String> {
     for active_wallpaper in active_wallpapers {
         let wallpaper = match schema::wallpapers::table
             .filter(schema::wallpapers::dsl::id.eq(active_wallpaper.wallpaper_id))
-            .get_result::<Wallpapers>(conn)
+            .get_result::<Wallpaper>(conn)
         {
             Ok(v) => v,
             Err(_) => {

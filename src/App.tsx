@@ -65,7 +65,7 @@ function WallpaperSource(props: {
 }
 
 function WallpaperPreview(props: {
-    wallpaper: ipc.types.Wallpapers;
+    wallpaper: ipc.types.Wallpaper;
     is_active: boolean;
     is_selected: boolean;
     onClick: () => void;
@@ -89,11 +89,9 @@ function App() {
     const [searchQuery, setSearchQuery] = createSignal('');
     const [debouncedSearchQuery, setDebouncedSearchQuery] = createSignal('');
     const [wallpaperSources, setWallpaperSources] = createSignal<
-        ipc.types.WallpaperSources[]
+        ipc.types.WallpaperSource[]
     >([]);
-    const [wallpapers, setWallpapers] = createSignal<ipc.types.Wallpapers[]>(
-        [],
-    );
+    const [wallpapers, setWallpapers] = createSignal<ipc.types.Wallpaper[]>([]);
     const [screens, setScreens] = createSignal<string[]>();
     const [selectedScreen, setSelectedScreen] = createSignal<string>('all');
     const [selectedMode, setSelectedMode] =
