@@ -6,7 +6,7 @@ use diesel::prelude::*;
 use tauri::State;
 
 #[tauri::command]
-pub fn remove_wallpaper_source(
+pub fn cmd_remove_wallpaper_source(
     state: State<'_, DbPoolWrapper>,
     id: String,
 ) -> Result<Response<WallpaperSource>, String> {

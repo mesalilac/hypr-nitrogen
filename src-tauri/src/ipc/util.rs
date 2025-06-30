@@ -8,7 +8,7 @@ use diesel::prelude::*;
 use tauri::State;
 
 #[tauri::command]
-pub async fn scan_source(
+pub async fn cmd_scan_source(
     state: State<'_, DbPoolWrapper>,
     source_id: String,
 ) -> Result<Response<Vec<Wallpaper>>, String> {
@@ -36,7 +36,7 @@ pub async fn scan_source(
 }
 
 #[tauri::command]
-pub async fn scan_all_sources(
+pub async fn cmd_scan_all_sources(
     state: State<'_, DbPoolWrapper>,
 ) -> Result<Response<Vec<Wallpaper>>, String> {
     let mut conn = match state.pool.get() {
@@ -90,7 +90,7 @@ pub fn restore(conn: &mut SqliteConnection) -> Result<bool, String> {
 }
 
 #[tauri::command]
-pub fn restore_wallpapers(state: State<'_, DbPoolWrapper>) -> Result<Response<bool>, String> {
+pub fn cmd_restore_wallpapers(state: State<'_, DbPoolWrapper>) -> Result<Response<bool>, String> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
         Err(e) => return Err(e.to_string()),
