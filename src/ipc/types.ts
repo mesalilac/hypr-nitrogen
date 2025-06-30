@@ -6,13 +6,13 @@ export interface Active {
     mode: Mode;
 }
 
-export interface WallpaperSources {
+export interface WallpaperSource {
     id: string;
     path: string;
     active: boolean;
 }
 
-export interface Wallpapers {
+export interface Wallpaper {
     id: string;
     signature: string;
     path: string;
@@ -21,13 +21,8 @@ export interface Wallpapers {
     keywords: string;
 }
 
-export interface Error {
-    message: string;
-    details: string;
-}
+export type Error = string;
 
 export interface Response<T> {
-    ok: boolean;
-    data?: T;
-    error?: Error;
+    data: T;
 }
