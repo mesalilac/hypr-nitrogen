@@ -8,7 +8,7 @@ use tauri::State;
 
 /// returns list of active screens in hyprland
 #[tauri::command]
-pub fn cmd_get_screens() -> Result<Response<Vec<String>>, String> {
+pub async fn cmd_get_screens() -> Result<Response<Vec<String>>, String> {
     match hyprpaper::active_screens() {
         Ok(v) => Ok(Response::new(v)),
         Err(e) => Err(e.to_string()),
@@ -16,7 +16,7 @@ pub fn cmd_get_screens() -> Result<Response<Vec<String>>, String> {
 }
 
 #[tauri::command]
-pub fn cmd_get_wallpaper_sources(
+pub async fn cmd_get_wallpaper_sources(
     state: State<'_, DbPoolWrapper>,
 ) -> Result<Response<Vec<WallpaperSource>>, String> {
     let mut conn = match state.pool.get() {
@@ -31,7 +31,7 @@ pub fn cmd_get_wallpaper_sources(
 }
 
 #[tauri::command]
-pub fn cmd_get_wallpapers(
+pub async fn cmd_get_wallpapers(
     state: State<'_, DbPoolWrapper>,
 ) -> Result<Response<Vec<Wallpaper>>, String> {
     let mut conn = match state.pool.get() {
@@ -46,7 +46,7 @@ pub fn cmd_get_wallpapers(
 }
 
 #[tauri::command]
-pub fn cmd_get_active_wallpapers(
+pub async fn cmd_get_active_wallpapers(
     state: State<'_, DbPoolWrapper>,
 ) -> Result<Response<Vec<Active>>, String> {
     let mut conn = match state.pool.get() {

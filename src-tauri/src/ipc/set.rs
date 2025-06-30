@@ -9,7 +9,7 @@ use rand::Rng;
 use tauri::State;
 
 #[tauri::command]
-pub fn cmd_set_wallpaper(
+pub async fn cmd_set_wallpaper(
     state: State<'_, DbPoolWrapper>,
     screen: String,
     wallpaper_id: Option<String>,
@@ -104,7 +104,7 @@ pub fn cmd_set_wallpaper(
 }
 
 #[tauri::command]
-pub fn cmd_add_wallpaper_source(
+pub async fn cmd_add_wallpaper_source(
     state: State<'_, DbPoolWrapper>,
     path: String,
 ) -> Result<Response<WallpaperSource>, String> {
@@ -124,7 +124,7 @@ pub fn cmd_add_wallpaper_source(
 }
 
 #[tauri::command]
-pub fn cmd_update_wallpaper_source_active(
+pub async fn cmd_update_wallpaper_source_active(
     state: State<'_, DbPoolWrapper>,
     id: String,
     active: bool,

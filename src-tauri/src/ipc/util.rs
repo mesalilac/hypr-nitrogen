@@ -90,7 +90,9 @@ pub fn restore(conn: &mut SqliteConnection) -> Result<bool, String> {
 }
 
 #[tauri::command]
-pub fn cmd_restore_wallpapers(state: State<'_, DbPoolWrapper>) -> Result<Response<bool>, String> {
+pub async fn cmd_restore_wallpapers(
+    state: State<'_, DbPoolWrapper>,
+) -> Result<Response<bool>, String> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
         Err(e) => return Err(e.to_string()),
