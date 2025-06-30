@@ -205,13 +205,8 @@ pub fn scan(
 
     std::thread::spawn(|| {
         for (target_image_path, thumbnail_path) in thumbnail_generation_list {
-            match generate_thumbnail(&thumbnail_path, &target_image_path) {
-                Ok(thumbnail_path) => {
-                    println!("Thumbnail generated: '{}'", thumbnail_path);
-                }
-                Err(_) => {
-                    continue;
-                }
+            if let Ok(thumbnail_path) = generate_thumbnail(&thumbnail_path, &target_image_path) {
+                println!("Thumbnail generated: '{}'", thumbnail_path);
             }
         }
     });
