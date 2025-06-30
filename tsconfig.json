@@ -3,31 +3,18 @@
         "target": "ES2020",
         "useDefineForClassFields": true,
         "module": "ESNext",
-        "lib": [
-            "ES2020",
-            "DOM",
-            "DOM.Iterable"
-        ],
+        "lib": ["ES2020", "DOM", "DOM.Iterable"],
         "baseUrl": ".",
         "paths": {
-            "@/*": [
-                "./src/*"
-            ],
-            "@components/*": [
-                "./src/components/*"
-            ],
-            "@ipc": [
-                "./src/ipc"
-            ],
-            "@assets/*": [
-                "./src/assets/*"
-            ],
-            "@styles/*": [
-                "./src/styles/*"
-            ]
+            "@/*": ["./src/*"],
+            "@components/*": ["./src/components/*"],
+            "@ipc": ["./src/ipc"],
+            "@assets/*": ["./src/assets/*"],
+            "@styles/*": ["./src/styles/*"]
         },
         "skipLibCheck": true,
         /* Bundler mode */
+        "forceConsistentCasingInFileNames": true,
         "moduleResolution": "bundler",
         "allowImportingTsExtensions": true,
         "resolveJsonModule": true,
@@ -41,9 +28,7 @@
         "noUnusedParameters": true,
         "noFallthroughCasesInSwitch": true
     },
-    "include": [
-        "src"
-    ],
+    "include": ["src"],
     "references": [
         {
             "path": "./tsconfig.node.json"
