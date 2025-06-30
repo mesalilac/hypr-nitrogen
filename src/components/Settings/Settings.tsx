@@ -46,8 +46,12 @@ function Settings(props: Props) {
         });
 
         if (directory) {
-            ipc.add
-                .wallpaper_source({ path: directory })
+            toast
+                .promise(ipc.add.wallpaper_source({ path: directory }), {
+                    loading: 'Adding new source...',
+                    success: 'Source added',
+                    error: 'Failed to add source',
+                })
                 .then((res) => {
                     setWallpaperSources([...wallpaperSources(), res.data!]);
                     toast
