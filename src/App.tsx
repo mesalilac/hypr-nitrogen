@@ -8,59 +8,13 @@ import {
     Match,
     onCleanup,
 } from 'solid-js';
-import { open } from '@tauri-apps/plugin-dialog';
 import toast, { Toaster } from 'solid-toast';
 import { debounce } from '@solid-primitives/scheduled';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import fallbackImage from './assets/fallback-image.svg';
+import Settings from './components/Settings';
 import * as ipc from './ipc';
 import './App.css';
-
-function WallpaperSource(props: {
-    id: string;
-    path: string;
-    active: boolean;
-    update_source_list_fn: (id: string) => void;
-}) {
-    const [active, setActive] = createSignal(props.active);
-
-    function handleCheckboxChange(v: boolean) {
-        setActive(v);
-        ipc.update
-            .wallpaper_source_active({ id: props.id, active: active() })
-            .then((res) => {
-                toast.success(
-                    `Source is now ${res.data.active ? 'active' : 'inactive'}`,
-                );
-            })
-            .catch((e) => toast.error(e));
-    }
-
-    function handleSourceRemove() {
-        ipc.remove
-            .wallpaper_source({ id: props.id })
-            .then((res) => {
-                props.update_source_list_fn(res.data.id);
-            })
-            .catch((e) => toast.error(e));
-    }
-
-    return (
-        <div class='wallpaper-source-item'>
-            <div>
-                <input
-                    type='checkbox'
-                    checked={active()}
-                    onChange={(e) =>
-                        handleCheckboxChange(e.currentTarget.checked)
-                    }
-                />
-                {props.path}
-            </div>
-            <button onClick={handleSourceRemove}>remove</button>
-        </div>
-    );
-}
 
 function WallpaperPreview(props: {
     wallpaper: ipc.types.Wallpaper;
@@ -86,9 +40,6 @@ function App() {
     const [showSettings, setShowSettings] = createSignal(false);
     const [searchQuery, setSearchQuery] = createSignal('');
     const [debouncedSearchQuery, setDebouncedSearchQuery] = createSignal('');
-    const [wallpaperSources, setWallpaperSources] = createSignal<
-        ipc.types.WallpaperSource[]
-    >([]);
     const [wallpapers, setWallpapers] = createSignal<ipc.types.Wallpaper[]>([]);
     const [screens, setScreens] = createSignal<string[]>();
     const [selectedScreen, setSelectedScreen] = createSignal<string>('all');
@@ -142,12 +93,6 @@ function App() {
             })
             .catch((e) => toast.error(e));
         ipc.get
-            .wallpaper_sources()
-            .then((res) => {
-                setWallpaperSources(res.data);
-            })
-            .catch((e) => toast.error(e));
-        ipc.get
             .screens()
             .then((res) => {
                 setScreens(res.data);
@@ -159,41 +104,6 @@ function App() {
     onCleanup(() => {
         debouncedPerformSearch.clear();
     });
-
-    async function addSource() {
-        const directory = await open({
-            directory: true,
-        });
-
-        if (directory) {
-            ipc.add
-                .wallpaper_source({ path: directory })
-                .then((res) => {
-                    setWallpaperSources([...wallpaperSources(), res.data!]);
-                    toast
-                        .promise(
-                            ipc.util.scan_source({ sourceId: res.data.id }),
-                            {
-                                loading: 'Scanning...',
-                                success: 'Scan complete',
-                                error: 'Scan failed',
-                            },
-                        )
-                        .then((res2) => {
-                            setWallpapers([...wallpapers(), ...res2.data]);
-                        })
-                        .catch((e) => toast.error(e));
-                })
-                .catch((e) => {
-                    toast.error(e);
-                });
-        }
-    }
-
-    function update_source_list(id: string) {
-        setWallpaperSources(wallpaperSources().filter((x) => x.id !== id));
-        setWallpapers(wallpapers().filter((x) => x.wallpaper_source_id !== id));
-    }
 
     function scanAll() {
         setScanButtonActive(false);
@@ -252,9 +162,6 @@ function App() {
                 loading: 'Restoring wallpapers...',
                 success: 'Wallpapers restored',
                 error: 'Failed to restore wallpapers',
-            })
-            .then(() => {
-                toast.success('Restored wallpapers');
             })
             .catch((e) => toast.error(e));
     }
@@ -345,43 +252,11 @@ function App() {
                 </Switch>
             </div>
             <Show when={showSettings()}>
-                <div class='settings-container'>
-                    <div class='settings'>
-                        <div class='wallpaper-sources-list'>
-                            <button onClick={addSource}>Add source</button>
-                            <div>
-                                <For each={wallpaperSources()}>
-                                    {(x) => (
-                                        <WallpaperSource
-                                            id={x.id}
-                                            path={x.path}
-                                            active={x.active}
-                                            update_source_list_fn={
-                                                update_source_list
-                                            }
-                                        />
-                                    )}
-                                </For>
-                                <Switch>
-                                    <Match
-                                        when={wallpaperSources().length === 0}
-                                    >
-                                        <div>
-                                            No wallpaper sources found. Add a
-                                            source.
-                                        </div>
-                                    </Match>
-                                </Switch>
-                            </div>
-                        </div>
-                        <button
-                            class='settings-close-btn'
-                            onClick={() => setShowSettings(false)}
-                        >
-                            Close
-                        </button>
-                    </div>
-                </div>
+                <Settings
+                    setWallpapers={setWallpapers}
+                    wallpapers={wallpapers}
+                    setShowSettings={setShowSettings}
+                />
             </Show>
         </main>
     );
