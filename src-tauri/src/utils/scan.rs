@@ -20,6 +20,8 @@ pub struct WallpaperMetadata {
 type MetadataHashMap = HashMap<String, WallpaperMetadata>;
 type WallpapersHashMap = HashMap<String, NewWallpaper>;
 
+static IMAGE_EXTENSIONS_ARRAY: &[&str] = &["jpg", "jpeg", "png", "gif", "webp"];
+
 fn extract_metadata(metadata: &mut MetadataHashMap, path: &Path) {
     match std::fs::read_to_string(path) {
         Ok(t) => match serde_json::from_str::<Vec<WallpaperMetadata>>(&t) {
@@ -37,7 +39,6 @@ fn extract_metadata(metadata: &mut MetadataHashMap, path: &Path) {
         }
     }
 }
-static IMAGE_EXTENSIONS_ARRAY: &[&str] = &["jpg", "jpeg", "png", "gif", "webp"];
 
 fn is_image_extension(ext_os_str: &OsStr) -> bool {
     ext_os_str.to_str().is_some_and(|s| {
@@ -71,13 +72,13 @@ fn keywords_from_file_name(file_name: &OsStr) -> String {
 
 pub fn scan(
     conn: &mut SqliteConnection,
-    id: String,
-    path: String,
+    source_id: String,
+    source_path: String,
 ) -> Result<Vec<Wallpaper>, String> {
     let mut wallpapers_hashmap: WallpapersHashMap = HashMap::new();
     let mut metadata: MetadataHashMap = HashMap::new();
 
-    for entry in WalkDir::new(path)
+    for entry in WalkDir::new(source_path)
         .into_iter()
         .filter_map(|e| e.ok().filter(|x| x.path().is_file()))
     {
@@ -94,7 +95,7 @@ pub fn scan(
                             signature.clone(),
                             entry.path().to_string_lossy().to_string(),
                             None, // TODO: Extract resolution
-                            id.clone(),
+                            source_id.clone(),
                             None,
                         );
 
