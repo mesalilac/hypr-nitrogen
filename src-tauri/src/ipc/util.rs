@@ -1,6 +1,5 @@
 use crate::database::connection::DbPoolWrapper;
 use crate::database::models::*;
-use crate::hyprpaper;
 use crate::ipc::Response;
 use crate::schema;
 use crate::utils::restore;
