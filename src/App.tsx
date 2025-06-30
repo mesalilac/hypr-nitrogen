@@ -16,8 +16,6 @@ import fallbackImage from './assets/fallback-image.svg';
 import * as ipc from './ipc';
 import './App.css';
 
-// TODO: Refactor
-
 function WallpaperSource(props: {
     id: string;
     path: string;
