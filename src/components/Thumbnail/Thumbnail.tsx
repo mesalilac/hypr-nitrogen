@@ -15,7 +15,7 @@ function Thumbnail(props: Props) {
             <img
                 id={props.is_selected ? 'thumbnail-selected' : ''}
                 class={`thumbnail ${props.is_active ? 'thumbnail-active' : ''}`}
-                src={convertFileSrc(props.wallpaper.path)}
+                src={convertFileSrc(props.wallpaper.thumbnail_path)}
                 loading='lazy'
                 onError={(e) => (e.currentTarget.src = fallbackImage)}
             />
