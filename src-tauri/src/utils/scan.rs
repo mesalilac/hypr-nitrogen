@@ -10,6 +10,7 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
+use std::{process, thread};
 use walkdir::WalkDir;
 
 #[derive(Deserialize, Clone, Debug)]
@@ -22,6 +23,9 @@ pub struct WallpaperMetadata {
 
 type MetadataHashMap = HashMap<String, WallpaperMetadata>;
 type WallpapersHashMap = HashMap<String, NewWallpaper>;
+type ImageSource = PathBuf;
+type ThumbnailDest = PathBuf;
+type ThumbnailTask = (ImageSource, ThumbnailDest);
 
 static IMAGE_EXTENSIONS_ARRAY: &[&str] = &["jpg", "jpeg", "png", "gif", "webp"];
 
@@ -107,6 +111,40 @@ fn generate_thumbnail(thumbnail_path: &Path, target_image: &Path) -> Result<Stri
     Err("Failed to generate thumbnail".to_string())
 }
 
+fn process_thumbnail_task_list(list: Vec<ThumbnailTask>) {
+    let total_threads = thread::available_parallelism()
+        .map(|x| x.get())
+        .unwrap_or(4);
+
+    let mut batches: Vec<Vec<ThumbnailTask>> = vec![Vec::new(); total_threads];
+
+    for (i, item) in list.into_iter().enumerate() {
+        let batch_index = i % total_threads;
+        batches[batch_index].push(item);
+    }
+
+    let mut handles = Vec::new();
+
+    for batch in batches {
+        let handle = thread::spawn(|| {
+            for (target_image_path, thumbnail_path) in batch {
+                match generate_thumbnail(&thumbnail_path, &target_image_path) {
+                    Ok(v) => println!("Thumbnail generated: '{}'", v),
+                    Err(e) => eprintln!("Failed to generate thumbnail: {}", e),
+                }
+            }
+        });
+
+        handles.push(handle);
+    }
+
+    for handle in handles {
+        if handle.join().is_err() {
+            eprintln!("Failed to join thread");
+        }
+    }
+}
+
 pub fn scan(
     conn: &mut SqliteConnection,
     source_id: String,
@@ -114,7 +152,7 @@ pub fn scan(
 ) -> Result<Vec<Wallpaper>, String> {
     let mut wallpapers_hashmap: WallpapersHashMap = HashMap::new();
     let mut metadata: MetadataHashMap = HashMap::new();
-    let mut thumbnail_generation_list: Vec<(PathBuf, PathBuf)> = Vec::new();
+    let mut thumbnail_generation_list: Vec<ThumbnailTask> = Vec::new();
 
     for entry in WalkDir::new(source_path)
         .into_iter()
@@ -204,14 +242,7 @@ pub fn scan(
         }
     }
 
-    std::thread::spawn(|| {
-        for (target_image_path, thumbnail_path) in thumbnail_generation_list {
-            match generate_thumbnail(&thumbnail_path, &target_image_path) {
-                Ok(v) => println!("Thumbnail generated: '{}'", v),
-                Err(e) => eprintln!("Failed to generate thumbnail: {}", e),
-            }
-        }
-    });
+    process_thumbnail_task_list(thumbnail_generation_list);
 
     Ok(wallpapers_list)
 }
