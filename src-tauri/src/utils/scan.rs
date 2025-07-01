@@ -83,7 +83,7 @@ fn create_thumbnail_path(signature: &str) -> String {
         }
     }
 
-    thumbnail_path.push(format!("{}.webp", signature));
+    thumbnail_path.push(format!("{}.jpeg", signature));
     thumbnail_path.to_string_lossy().to_string()
 }
 
@@ -94,9 +94,10 @@ fn generate_thumbnail(thumbnail_path: &Path, target_image: &Path) -> Result<Stri
 
     if let Ok(image) = ImageReader::open(target_image) {
         if let Ok(decoded_image) = image.decode() {
-            let new_image = thumbnail(&decoded_image, 400, 200);
+            // `.to_rgb8` Because The JPEG file format doesn't support alpha (see https://github.com/image-rs/image/issues/2211)
+            let new_image = thumbnail(&decoded_image.to_rgb8(), 400, 200);
 
-            match new_image.save_with_format(&thumbnail_path, ImageFormat::WebP) {
+            match new_image.save_with_format(&thumbnail_path, ImageFormat::Jpeg) {
                 Ok(_) => return Ok(thumbnail_path.to_string_lossy().to_string()),
                 Err(e) => return Err(e.to_string()),
             }
