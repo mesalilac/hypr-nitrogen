@@ -27,6 +27,12 @@ type ImageSource = PathBuf;
 type ThumbnailDest = PathBuf;
 type ThumbnailTask = (ImageSource, ThumbnailDest);
 
+enum ThumbnailGenerationError {
+    AlreadyExists,
+    Image(image::ImageError),
+    Other(String),
+}
+
 static IMAGE_EXTENSIONS_ARRAY: &[&str] = &["jpg", "jpeg", "png", "gif", "webp"];
 
 fn extract_metadata(metadata: &mut MetadataHashMap, path: &Path) {
@@ -91,9 +97,12 @@ fn create_thumbnail_path(signature: &str) -> String {
     thumbnail_path.to_string_lossy().to_string()
 }
 
-fn generate_thumbnail(thumbnail_path: &Path, target_image: &Path) -> Result<String, String> {
+fn generate_thumbnail(
+    thumbnail_path: &Path,
+    target_image: &Path,
+) -> Result<String, ThumbnailGenerationError> {
     if thumbnail_path.exists() {
-        return Err("Thumbnail already exists".to_string());
+        return Err(ThumbnailGenerationError::AlreadyExists);
     }
 
     if let Ok(image) = ImageReader::open(target_image) {
@@ -103,12 +112,14 @@ fn generate_thumbnail(thumbnail_path: &Path, target_image: &Path) -> Result<Stri
 
             match new_image.save_with_format(&thumbnail_path, ImageFormat::Jpeg) {
                 Ok(_) => return Ok(thumbnail_path.to_string_lossy().to_string()),
-                Err(e) => return Err(e.to_string()),
+                Err(e) => return Err(ThumbnailGenerationError::Image(e)),
             }
         }
     }
 
-    Err("Failed to generate thumbnail".to_string())
+    Err(ThumbnailGenerationError::Other(
+        "Failed to generate thumbnail".to_string(),
+    ))
 }
 
 fn process_thumbnail_task_list(list: Vec<ThumbnailTask>) {
@@ -130,7 +141,15 @@ fn process_thumbnail_task_list(list: Vec<ThumbnailTask>) {
             for (target_image_path, thumbnail_path) in batch {
                 match generate_thumbnail(&thumbnail_path, &target_image_path) {
                     Ok(v) => println!("Thumbnail generated: '{}'", v),
-                    Err(e) => eprintln!("Failed to generate thumbnail: {}", e),
+                    Err(e) => match e {
+                        ThumbnailGenerationError::AlreadyExists => {}
+                        ThumbnailGenerationError::Image(e) => {
+                            println!("Failed to generate thumbnail(Image): '{}'", e)
+                        }
+                        ThumbnailGenerationError::Other(e) => {
+                            println!("Failed to generate thumbnail(Unexpected): '{}'", e)
+                        }
+                    },
                 }
             }
         });
