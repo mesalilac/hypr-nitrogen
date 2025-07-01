@@ -87,9 +87,9 @@ fn create_thumbnail_path(signature: &str) -> String {
     thumbnail_path.to_string_lossy().to_string()
 }
 
-fn generate_thumbnail(thumbnail_path: &Path, target_image: &Path) -> Result<String, ()> {
+fn generate_thumbnail(thumbnail_path: &Path, target_image: &Path) -> Result<String, String> {
     if thumbnail_path.exists() {
-        return Err(());
+        return Err("Thumbnail already exists".to_string());
     }
 
     if let Ok(image) = ImageReader::open(target_image) {
@@ -98,12 +98,12 @@ fn generate_thumbnail(thumbnail_path: &Path, target_image: &Path) -> Result<Stri
 
             match new_image.save_with_format(&thumbnail_path, ImageFormat::WebP) {
                 Ok(_) => return Ok(thumbnail_path.to_string_lossy().to_string()),
-                Err(_) => return Err(()),
+                Err(e) => return Err(e.to_string()),
             }
         }
     }
 
-    Err(())
+    Err("Failed to generate thumbnail".to_string())
 }
 
 pub fn scan(
@@ -205,8 +205,9 @@ pub fn scan(
 
     std::thread::spawn(|| {
         for (target_image_path, thumbnail_path) in thumbnail_generation_list {
-            if let Ok(thumbnail_path) = generate_thumbnail(&thumbnail_path, &target_image_path) {
-                println!("Thumbnail generated: '{}'", thumbnail_path);
+            match generate_thumbnail(&thumbnail_path, &target_image_path) {
+                Ok(v) => println!("Thumbnail generated: '{}'", v),
+                Err(e) => eprintln!("Failed to generate thumbnail: {}", e),
             }
         }
     });
