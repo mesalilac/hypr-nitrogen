@@ -80,8 +80,11 @@ function Settings(props: Props) {
     return (
         <div class='settings-container'>
             <div class='settings'>
+                <div class='settings-sources-list-header'>
+                    <span>Sources list</span>
+                    <button onClick={addSource}>+</button>
+                </div>
                 <div class='wallpaper-sources-list'>
-                    <button onClick={addSource}>Add source</button>
                     <div>
                         <For each={wallpaperSources()}>
                             {(x) => (

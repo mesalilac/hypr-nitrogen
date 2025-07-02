@@ -35,17 +35,13 @@ function WallpaperSource(props: Props) {
 
     return (
         <div class='wallpaper-source-item'>
-            <div>
-                <input
-                    type='checkbox'
-                    checked={active()}
-                    onChange={(e) =>
-                        handleCheckboxChange(e.currentTarget.checked)
-                    }
-                />
-                {props.path}
-            </div>
-            <button onClick={handleSourceRemove}>remove</button>
+            <input
+                type='checkbox'
+                checked={active()}
+                onChange={(e) => handleCheckboxChange(e.currentTarget.checked)}
+            />
+            <span>{props.path}</span>
+            <button onClick={handleSourceRemove}>x</button>
         </div>
     );
 }
