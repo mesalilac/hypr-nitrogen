@@ -93,6 +93,7 @@ function Settings(props: Props) {
                                     path={x.path}
                                     active={x.active}
                                     update_source_list_fn={update_source_list}
+                                    setWallpapers={props.setWallpapers}
                                 />
                             )}
                         </For>

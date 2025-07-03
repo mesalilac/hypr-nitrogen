@@ -38,7 +38,15 @@ pub async fn cmd_get_wallpapers(
         Err(e) => return Err(e.to_string()),
     };
 
-    match schema::wallpapers::table.get_results::<Wallpaper>(&mut conn) {
+    match schema::wallpapers::table
+        .inner_join(
+            schema::wallpaper_sources::table
+                .on(schema::wallpapers::wallpaper_source_id.eq(schema::wallpaper_sources::id)),
+        )
+        .filter(schema::wallpaper_sources::active.eq(true))
+        .select(schema::wallpapers::all_columns)
+        .get_results::<Wallpaper>(&mut conn)
+    {
         Ok(v) => Ok(Response::new(v)),
         Err(e) => Err(e.to_string()),
     }
