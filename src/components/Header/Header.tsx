@@ -128,7 +128,6 @@ function Header(props: Props) {
                             (e.target as HTMLSelectElement).value,
                         )
                     }
-                    disabled={true}
                 >
                     <option value='all'>all</option>
                     <For each={screens()}>

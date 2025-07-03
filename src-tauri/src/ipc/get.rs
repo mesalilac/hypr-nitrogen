@@ -6,7 +6,6 @@ use crate::schema;
 use diesel::prelude::*;
 use tauri::State;
 
-/// returns list of active screens in hyprland
 #[tauri::command]
 pub async fn cmd_get_screens() -> Result<Response<Vec<String>>, String> {
     match hyprpaper::active_screens() {

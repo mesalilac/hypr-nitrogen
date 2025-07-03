@@ -19,19 +19,13 @@ pub fn restore(conn: &mut SqliteConnection) -> Result<bool, String> {
             }
         };
 
-        // NOTE: Multi screen is disabled for now
-        // Also if you run `hyprpaper::set_wallpaper` in a loop that can crash hyprpaper daemon
-        match hyprpaper::set_wallpaper(
-            // active_wallpaper.screen,
-            "all".to_string(),
+        if let Err(e) = hyprpaper::set_wallpaper(
+            active_wallpaper.screen,
             wallpaper.path,
             &hyprpaper::Mode::from_string(active_wallpaper.mode),
         ) {
-            Ok(_) => {}
-            Err(e) => return Err(e.to_string()),
+            return Err(e.to_string());
         }
-
-        break;
     }
 
     Ok(true)
