@@ -4,13 +4,14 @@ use crate::schema;
 use crate::utils::fs::get_cache_dir;
 use diesel::prelude::*;
 use diesel::result::{DatabaseErrorKind, Error as DieselError};
+use futures::StreamExt;
 use image::imageops::thumbnail;
 use image::{ImageFormat, ImageReader};
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
-use std::{process, thread};
+use tauri::async_runtime;
 use walkdir::WalkDir;
 
 #[derive(Deserialize, Clone, Debug)]
@@ -97,55 +98,45 @@ fn create_thumbnail_path(signature: &str) -> String {
     thumbnail_path.to_string_lossy().to_string()
 }
 
-fn process_thumbnail_task_list(list: Vec<ThumbnailTask>) {
-    let total_threads = thread::available_parallelism()
+async fn process_thumbnail_task_list(list: Vec<ThumbnailTask>) {
+    let total_threads = std::thread::available_parallelism()
         .map(|x| x.get())
         .unwrap_or(4);
 
-    let mut batches: Vec<Vec<ThumbnailTask>> = vec![Vec::new(); total_threads];
+    let stream = futures::stream::iter(list.into_iter().map(|(src, dest)| {
+        async_runtime::spawn_blocking(move || {
+            if !dest.exists() {
+                let Ok(image) = ImageReader::open(&src) else {
+                    log::warn!("Failed to open image: '{}'", src.to_string_lossy());
+                    return;
+                };
 
-    for (i, item) in list.into_iter().enumerate() {
-        let batch_index = i % total_threads;
-        batches[batch_index].push(item);
-    }
+                let Ok(decoded_image) = image.decode() else {
+                    log::warn!("Failed to decode image: '{}'", src.to_string_lossy());
+                    return;
+                };
 
-    let mut handles = Vec::new();
+                let new_image = thumbnail(&decoded_image.to_rgb8(), 400, 200);
 
-    for batch in batches {
-        let handle = thread::spawn(move || {
-            for (target_image_path, thumbnail_path) in batch {
-                if thumbnail_path.exists() {
-                    continue;
-                }
-
-                if let Ok(image) = ImageReader::open(&target_image_path) {
-                    if let Ok(decoded_image) = image.decode() {
-                        // `.to_rgb8` Because The JPEG file format doesn't support alpha (see https://github.com/image-rs/image/issues/2211)
-                        let new_image = thumbnail(&decoded_image.to_rgb8(), 400, 200);
-
-                        match new_image.save_with_format(&thumbnail_path, THUMBNAIL_FORMAT) {
-                            Ok(_) => log::info!(
-                                "Thumbnail generated: '{}'",
-                                thumbnail_path.to_string_lossy()
-                            ),
-                            Err(e) => log::error!("Failed to generate thumbnail(Image): '{}'", e),
-                        }
-                    }
-                }
+                match new_image.save_with_format(&dest, THUMBNAIL_FORMAT) {
+                    Ok(_) => log::info!("Thumbnail generated: '{}'", dest.to_string_lossy()),
+                    Err(e) => log::error!("Failed to generate thumbnail(Image): '{}'", e),
+                };
             }
-        });
+        })
+    }))
+    .buffer_unordered(total_threads);
 
-        handles.push(handle);
-    }
-
-    for handle in handles {
-        if handle.join().is_err() {
-            log::error!("Failed to join thread");
-        }
-    }
+    stream
+        .for_each(|result| async {
+            if let Err(e) = result {
+                log::error!("Thread paniced: {}", e);
+            }
+        })
+        .await;
 }
 
-pub fn scan(
+pub async fn scan(
     conn: &mut SqliteConnection,
     source_id: String,
     source_path: String,
@@ -242,12 +233,12 @@ pub fn scan(
         }
     }
 
-    process_thumbnail_task_list(thumbnail_generation_list);
+    process_thumbnail_task_list(thumbnail_generation_list).await;
 
     Ok(wallpapers_list)
 }
 
-pub fn scan_all(conn: &mut SqliteConnection) -> Result<Response<Vec<Wallpaper>>, String> {
+pub async fn scan_all(conn: &mut SqliteConnection) -> Result<Response<Vec<Wallpaper>>, String> {
     let mut wallpapers_list: Vec<Wallpaper> = Vec::new();
 
     let wallpaper_sources: Vec<WallpaperSource> =
@@ -259,7 +250,7 @@ pub fn scan_all(conn: &mut SqliteConnection) -> Result<Response<Vec<Wallpaper>>,
         };
 
     for source in wallpaper_sources {
-        match scan(conn, source.id, source.path) {
+        match scan(conn, source.id, source.path).await {
             Ok(wallpapers) => {
                 wallpapers_list.extend(wallpapers);
             }

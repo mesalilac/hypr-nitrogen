@@ -27,7 +27,7 @@ pub async fn cmd_scan_source(
         Err(e) => return Err(e.to_string()),
     };
 
-    let wallpapers = match scan(&mut conn, wallpaper_source.id, wallpaper_source.path) {
+    let wallpapers = match scan(&mut conn, wallpaper_source.id, wallpaper_source.path).await {
         Ok(v) => v,
         Err(e) => return Err(e),
     };
@@ -48,7 +48,7 @@ pub async fn cmd_scan_all_sources(
         return Err(err.to_string());
     }
 
-    match scan_all(&mut conn) {
+    match scan_all(&mut conn).await {
         Ok(v) => Ok(v),
         Err(e) => Err(e),
     }
