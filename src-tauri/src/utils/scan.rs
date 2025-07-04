@@ -44,11 +44,11 @@ fn extract_metadata(metadata: &mut MetadataHashMap, path: &Path) {
                 }
             }
             Err(e) => {
-                println!("Error reading metadata file: {}", e);
+                log::error!("Error reading metadata file: {}", e);
             }
         },
         Err(e) => {
-            println!("Error reading metadata file: {}", e);
+            log::error!("Error reading metadata file: {}", e);
         }
     }
 }
@@ -68,7 +68,7 @@ fn generate_signature(path: &Path) -> Option<String> {
             return Some(hash.to_string());
         }
         Err(e) => {
-            println!("Error reading file: {}", e);
+            log::error!("Error reading file: {}", e);
         }
     }
 
@@ -89,7 +89,7 @@ fn create_thumbnail_path(signature: &str) -> String {
 
     if !thumbnail_path.exists() {
         if let Err(e) = std::fs::create_dir(&thumbnail_path) {
-            eprintln!("Failed to create thumbnails dir: {}", e);
+            log::error!("Failed to create thumbnails dir: {}", e);
         }
     }
 
@@ -140,14 +140,14 @@ fn process_thumbnail_task_list(list: Vec<ThumbnailTask>) {
         let handle = thread::spawn(|| {
             for (target_image_path, thumbnail_path) in batch {
                 match generate_thumbnail(&thumbnail_path, &target_image_path) {
-                    Ok(v) => println!("Thumbnail generated: '{}'", v),
+                    Ok(v) => log::info!("Thumbnail generated: '{}'", v),
                     Err(e) => match e {
                         ThumbnailGenerationError::AlreadyExists => {}
                         ThumbnailGenerationError::Image(e) => {
-                            println!("Failed to generate thumbnail(Image): '{}'", e)
+                            log::error!("Failed to generate thumbnail(Image): '{}'", e)
                         }
                         ThumbnailGenerationError::Other(e) => {
-                            println!("Failed to generate thumbnail(Unexpected): '{}'", e)
+                            log::error!("Failed to generate thumbnail(Unexpected): '{}'", e)
                         }
                     },
                 }
@@ -159,7 +159,7 @@ fn process_thumbnail_task_list(list: Vec<ThumbnailTask>) {
 
     for handle in handles {
         if handle.join().is_err() {
-            eprintln!("Failed to join thread");
+            log::error!("Failed to join thread");
         }
     }
 }

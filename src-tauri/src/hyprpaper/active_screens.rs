@@ -18,6 +18,7 @@ pub fn active_screens() -> Result<Vec<String>, Error> {
         Ok(output) => {
             if let Ok(text) = String::from_utf8(output.stdout.clone()) {
                 if text == UNKNOWN_REQUEST_ERROR {
+                    log::error!("Failed to get active screens: unknown request");
                     return Err(Error::Dispatch(DispatchErrorKind::UnknownRequest));
                 }
             }
@@ -29,11 +30,17 @@ pub fn active_screens() -> Result<Vec<String>, Error> {
                             screens.push(item.name);
                         }
                     }
-                    Err(_) => return Err(Error::JsonParsing),
+                    Err(_) => {
+                        log::error!("Failed to get active screens, json parsing failed");
+                        return Err(Error::JsonParsing);
+                    }
                 }
             }
         }
-        Err(e) => return Err(Error::Os(e)),
+        Err(e) => {
+            log::error!("Failed to get active screens: {}", e);
+            return Err(Error::Os(e));
+        }
     }
 
     Ok(screens)

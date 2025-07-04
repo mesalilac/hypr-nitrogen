@@ -11,17 +11,30 @@ pub fn preload(wallpaper: String) -> Result<(), Error> {
         Ok(output) => {
             if let Ok(text) = String::from_utf8(output.stdout.clone()) {
                 if text == UNKNOWN_REQUEST_ERROR {
+                    log::error!(
+                        "Failed to preload wallpaper '{}': unknown request",
+                        wallpaper
+                    );
                     return Err(Error::Dispatch(DispatchErrorKind::UnknownRequest));
                 } else if text.starts_with(NO_SUCH_FILE_ERROR) {
+                    log::error!("Failed to preload wallpaper '{}': no such file", wallpaper);
                     return Err(Error::Dispatch(DispatchErrorKind::NoSuchFile));
                 }
 
                 if text != "ok\n" {
+                    log::error!(
+                        "Failed to preload wallpaper '{}': Unexpected: {}",
+                        wallpaper,
+                        text
+                    );
                     return Err(Error::Dispatch(DispatchErrorKind::UnExpected));
                 }
             }
         }
-        Err(e) => return Err(Error::Os(e)),
+        Err(e) => {
+            log::error!("Failed to preload wallpaper '{}': {}", wallpaper, e);
+            return Err(Error::Os(e));
+        }
     }
 
     Ok(())
