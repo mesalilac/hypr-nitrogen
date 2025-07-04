@@ -4,4 +4,4 @@ set -e
 
 echo "Removeing hypr-nitrogen.AppImage"
 
-rm -v ~/.local/bin/hypr-nitrogen.AppImage
+rm --verbose ~/.local/bin/hypr-nitrogen
