@@ -99,9 +99,11 @@ fn create_thumbnail_path(signature: &str) -> String {
 }
 
 async fn process_thumbnail_task_list(list: Vec<ThumbnailTask>) {
-    let total_threads = std::thread::available_parallelism()
-        .map(|x| x.get())
-        .unwrap_or(4);
+    // let total_threads = std::thread::available_parallelism()
+    //     .map(|x| x.get())
+    //     .unwrap_or(4);
+
+    let total_threads = 4;
 
     let stream = futures::stream::iter(list.into_iter().map(|(src, dest)| {
         async_runtime::spawn_blocking(move || {
