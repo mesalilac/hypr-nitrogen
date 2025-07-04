@@ -137,7 +137,7 @@ fn process_thumbnail_task_list(list: Vec<ThumbnailTask>) {
     let mut handles = Vec::new();
 
     for batch in batches {
-        let handle = thread::spawn(|| {
+        let handle = thread::spawn(move || {
             for (target_image_path, thumbnail_path) in batch {
                 match generate_thumbnail(&thumbnail_path, &target_image_path) {
                     Ok(v) => log::info!("Thumbnail generated: '{}'", v),
