@@ -5,3 +5,5 @@ dev.db
 flamegraph.svg
 perf.data
 perf.data.old
+memory-profiling_hypr-nitrogen_*.dat
+
