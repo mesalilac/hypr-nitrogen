@@ -233,6 +233,7 @@ pub async fn scan(
         }
     }
 
+    // FIX: Memory is not deallocated, when using a lot of threads
     process_thumbnail_task_list(thumbnail_generation_list).await;
 
     Ok(wallpapers_list)
