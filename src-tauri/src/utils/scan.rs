@@ -27,6 +27,8 @@ type ImageSource = PathBuf;
 type ThumbnailDest = PathBuf;
 type ThumbnailTask = (ImageSource, ThumbnailDest);
 
+const THUMBNAIL_FORMAT: ImageFormat = ImageFormat::Jpeg;
+
 static IMAGE_EXTENSIONS_ARRAY: &[&str] = &["jpg", "jpeg", "png", "gif", "webp"];
 
 fn extract_metadata(metadata: &mut MetadataHashMap, path: &Path) {
@@ -87,7 +89,11 @@ fn create_thumbnail_path(signature: &str) -> String {
         }
     }
 
-    thumbnail_path.push(format!("{}.jpeg", signature));
+    thumbnail_path.push(format!(
+        "{}.{}",
+        signature,
+        THUMBNAIL_FORMAT.extensions_str().first().unwrap_or(&"jpg")
+    ));
     thumbnail_path.to_string_lossy().to_string()
 }
 
@@ -117,7 +123,7 @@ fn process_thumbnail_task_list(list: Vec<ThumbnailTask>) {
                         // `.to_rgb8` Because The JPEG file format doesn't support alpha (see https://github.com/image-rs/image/issues/2211)
                         let new_image = thumbnail(&decoded_image.to_rgb8(), 400, 200);
 
-                        match new_image.save_with_format(&thumbnail_path, ImageFormat::Jpeg) {
+                        match new_image.save_with_format(&thumbnail_path, THUMBNAIL_FORMAT) {
                             Ok(_) => log::info!(
                                 "Thumbnail generated: '{}'",
                                 thumbnail_path.to_string_lossy()
