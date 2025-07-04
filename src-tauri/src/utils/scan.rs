@@ -27,12 +27,6 @@ type ImageSource = PathBuf;
 type ThumbnailDest = PathBuf;
 type ThumbnailTask = (ImageSource, ThumbnailDest);
 
-enum ThumbnailGenerationError {
-    AlreadyExists,
-    Image(image::ImageError),
-    Other(String),
-}
-
 static IMAGE_EXTENSIONS_ARRAY: &[&str] = &["jpg", "jpeg", "png", "gif", "webp"];
 
 fn extract_metadata(metadata: &mut MetadataHashMap, path: &Path) {
@@ -97,31 +91,6 @@ fn create_thumbnail_path(signature: &str) -> String {
     thumbnail_path.to_string_lossy().to_string()
 }
 
-fn generate_thumbnail(
-    thumbnail_path: &Path,
-    target_image: &Path,
-) -> Result<String, ThumbnailGenerationError> {
-    if thumbnail_path.exists() {
-        return Err(ThumbnailGenerationError::AlreadyExists);
-    }
-
-    if let Ok(image) = ImageReader::open(target_image) {
-        if let Ok(decoded_image) = image.decode() {
-            // `.to_rgb8` Because The JPEG file format doesn't support alpha (see https://github.com/image-rs/image/issues/2211)
-            let new_image = thumbnail(&decoded_image.to_rgb8(), 400, 200);
-
-            match new_image.save_with_format(&thumbnail_path, ImageFormat::Jpeg) {
-                Ok(_) => return Ok(thumbnail_path.to_string_lossy().to_string()),
-                Err(e) => return Err(ThumbnailGenerationError::Image(e)),
-            }
-        }
-    }
-
-    Err(ThumbnailGenerationError::Other(
-        "Failed to generate thumbnail".to_string(),
-    ))
-}
-
 fn process_thumbnail_task_list(list: Vec<ThumbnailTask>) {
     let total_threads = thread::available_parallelism()
         .map(|x| x.get())
@@ -139,17 +108,23 @@ fn process_thumbnail_task_list(list: Vec<ThumbnailTask>) {
     for batch in batches {
         let handle = thread::spawn(move || {
             for (target_image_path, thumbnail_path) in batch {
-                match generate_thumbnail(&thumbnail_path, &target_image_path) {
-                    Ok(v) => log::info!("Thumbnail generated: '{}'", v),
-                    Err(e) => match e {
-                        ThumbnailGenerationError::AlreadyExists => {}
-                        ThumbnailGenerationError::Image(e) => {
-                            log::error!("Failed to generate thumbnail(Image): '{}'", e)
+                if thumbnail_path.exists() {
+                    continue;
+                }
+
+                if let Ok(image) = ImageReader::open(&target_image_path) {
+                    if let Ok(decoded_image) = image.decode() {
+                        // `.to_rgb8` Because The JPEG file format doesn't support alpha (see https://github.com/image-rs/image/issues/2211)
+                        let new_image = thumbnail(&decoded_image.to_rgb8(), 400, 200);
+
+                        match new_image.save_with_format(&thumbnail_path, ImageFormat::Jpeg) {
+                            Ok(_) => log::info!(
+                                "Thumbnail generated: '{}'",
+                                thumbnail_path.to_string_lossy()
+                            ),
+                            Err(e) => log::error!("Failed to generate thumbnail(Image): '{}'", e),
                         }
-                        ThumbnailGenerationError::Other(e) => {
-                            log::error!("Failed to generate thumbnail(Unexpected): '{}'", e)
-                        }
-                    },
+                    }
                 }
             }
         });
