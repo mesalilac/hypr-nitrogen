@@ -11,7 +11,7 @@ This template should help get you started developing with Tauri, Solid and Types
 See: https://github.com/linuxdeploy/linuxdeploy/issues/272
 
 ```
-NO_STRIP=true cargo tauri build
+NO_STRIP=true cargo tauri build -b appimage
 ```
 
 Copy the app file from `src-tauri/target/release/bundle/appimage` to ~/.local/bin
