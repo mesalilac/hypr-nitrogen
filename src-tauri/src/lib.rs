@@ -19,7 +19,7 @@ pub fn run() {
     if let Ok(mut conn) = pool.get() {
         match conn.run_pending_migrations(MIGRATIONS) {
             Ok(_) => {}
-            Err(e) => panic!("Failed to run migrations: {}", e),
+            Err(e) => panic!("Failed to run migrations: {e}"),
         }
     }
 

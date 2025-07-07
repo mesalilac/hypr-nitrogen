@@ -37,11 +37,11 @@ fn extract_metadata(metadata: &mut MetadataHashMap, path: &Path) {
                 }
             }
             Err(e) => {
-                log::error!("Error reading metadata file: {}", e);
+                log::error!("Error reading metadata file: {e}");
             }
         },
         Err(e) => {
-            log::error!("Error reading metadata file: {}", e);
+            log::error!("Error reading metadata file: {e}");
         }
     }
 }
@@ -61,7 +61,7 @@ fn generate_signature(path: &Path) -> Option<String> {
             return Some(hash.to_string());
         }
         Err(e) => {
-            log::error!("Error reading file: {}", e);
+            log::error!("Error reading file: {e}");
         }
     }
 
@@ -82,7 +82,7 @@ fn create_thumbnail_path(signature: &str) -> String {
 
     if !thumbnail_path.exists() {
         if let Err(e) = std::fs::create_dir(&thumbnail_path) {
-            log::error!("Failed to create thumbnails dir: {}", e);
+            log::error!("Failed to create thumbnails dir: {e}");
         }
     }
 
@@ -124,7 +124,7 @@ async fn process_thumbnail_task_list(list: Vec<ThumbnailTask>) {
     stream
         .for_each(|result| async {
             if let Err(e) = result {
-                log::error!("Thread paniced: {}", e);
+                log::error!("Thread paniced: {e}");
             }
         })
         .await;
