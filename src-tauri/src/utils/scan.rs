@@ -5,8 +5,6 @@ use crate::utils::fs::get_cache_dir;
 use diesel::prelude::*;
 use diesel::result::{DatabaseErrorKind, Error as DieselError};
 use futures::StreamExt;
-use image::imageops::thumbnail;
-use image::{ImageFormat, ImageReader};
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::ffi::OsStr;
@@ -27,8 +25,6 @@ type WallpapersHashMap = HashMap<String, NewWallpaper>;
 type ImageSource = PathBuf;
 type ThumbnailDest = PathBuf;
 type ThumbnailTask = (ImageSource, ThumbnailDest);
-
-const THUMBNAIL_FORMAT: ImageFormat = ImageFormat::Jpeg;
 
 static IMAGE_EXTENSIONS_ARRAY: &[&str] = &["jpg", "jpeg", "png", "gif", "webp"];
 
@@ -90,40 +86,36 @@ fn create_thumbnail_path(signature: &str) -> String {
         }
     }
 
-    thumbnail_path.push(format!(
-        "{}.{}",
-        signature,
-        THUMBNAIL_FORMAT.extensions_str().first().unwrap_or(&"jpg")
-    ));
+    thumbnail_path.push(format!("{}.{}", signature, "jpeg"));
     thumbnail_path.to_string_lossy().to_string()
 }
 
 async fn process_thumbnail_task_list(list: Vec<ThumbnailTask>) {
-    // let total_threads = std::thread::available_parallelism()
-    //     .map(|x| x.get())
-    //     .unwrap_or(4);
-
-    let total_threads = 4;
+    let total_threads = std::thread::available_parallelism()
+        .map(|x| x.get())
+        .unwrap_or(4);
 
     let stream = futures::stream::iter(list.into_iter().map(|(src, dest)| {
         async_runtime::spawn_blocking(move || {
             if !dest.exists() {
-                let Ok(image) = ImageReader::open(&src) else {
-                    log::warn!("Failed to open image: '{}'", src.to_string_lossy());
-                    return;
-                };
-
-                let Ok(decoded_image) = image.decode() else {
-                    log::warn!("Failed to decode image: '{}'", src.to_string_lossy());
-                    return;
-                };
-
-                let new_image = thumbnail(&decoded_image.to_rgb8(), 400, 200);
-
-                match new_image.save_with_format(&dest, THUMBNAIL_FORMAT) {
-                    Ok(_) => log::info!("Thumbnail generated: '{}'", dest.to_string_lossy()),
-                    Err(e) => log::error!("Failed to generate thumbnail(Image): '{}'", e),
-                };
+                match std::process::Command::new("magick")
+                    .arg(src.as_os_str())
+                    .arg("-thumbnail")
+                    .arg("400x200^")
+                    .arg("-format")
+                    .arg("jpeg")
+                    .arg(dest.as_os_str())
+                    .output()
+                {
+                    Ok(cmd) => {
+                        if cmd.status.success() {
+                            log::debug!("thumbnail generated: {}", dest.to_string_lossy())
+                        } else {
+                            log::warn!("Failed to generate thumbnail: {}", src.to_string_lossy());
+                        }
+                    }
+                    Err(e) => log::warn!("Failed to run magick command: {e}"),
+                }
             }
         })
     }))
@@ -235,7 +227,11 @@ pub async fn scan(
         }
     }
 
-    // FIX: Memory is not deallocated, when using a lot of threads
+    if let Err(e) = std::process::Command::new("magick").arg("--help").output() {
+        log::warn!("Failed to find magick command: {e}");
+        return Err(format!("Failed to find magick command: {e}"));
+    }
+
     process_thumbnail_task_list(thumbnail_generation_list).await;
 
     Ok(wallpapers_list)
