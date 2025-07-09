@@ -17,7 +17,7 @@ pub struct WallpaperMetadata {
     pub signature: String,
     pub caption: String,
     pub category: String,
-    pub tags: Vec<String>,
+    pub tags: String,
 }
 
 type MetadataHashMap = HashMap<String, WallpaperMetadata>;
@@ -143,7 +143,7 @@ pub async fn scan(
         .into_iter()
         .filter_map(|e| e.ok().filter(|x| x.path().is_file()))
     {
-        if entry.file_name().to_string_lossy() == "wallpaper_metadata.json" {
+        if entry.file_name().to_string_lossy() == "image_metadata.json" {
             extract_metadata(&mut metadata, entry.path());
             continue;
         }
@@ -178,23 +178,7 @@ pub async fn scan(
 
     wallpapers_hashmap.iter_mut().for_each(|w| {
         if let Some(metadata) = metadata.get(&w.1.signature) {
-            let mut temp_string = String::new();
-
-            temp_string.push_str(metadata.category.clone().as_str());
-            temp_string.push(' ');
-
-            metadata.tags.iter().for_each(|x| {
-                temp_string.push_str(x);
-                temp_string.push(' ');
-            });
-
-            temp_string.push_str(metadata.caption.clone().as_str());
-
-            if let Some(file_name) = Path::new(&w.1.path).file_stem() {
-                temp_string.push_str(&keywords_from_file_name(file_name));
-            }
-
-            w.1.keywords = Some(temp_string);
+            w.1.keywords = Some(metadata.tags.clone());
         } else {
             let mut temp_string = String::new();
 
