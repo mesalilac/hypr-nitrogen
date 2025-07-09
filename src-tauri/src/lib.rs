@@ -1,9 +1,12 @@
+mod cli;
 mod database;
 mod hyprpaper;
 mod ipc;
 mod schema;
 mod utils;
 
+use clap::Parser;
+use cli::Cli;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use dotenvy::dotenv;
 
@@ -13,6 +16,15 @@ const APP_NAME: &str = "hypr-nitrogen";
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     dotenv().ok();
+    let cli = Cli::parse();
+
+    let mut builder = env_logger::Builder::new();
+
+    if cli.verbose {
+        builder.filter_level(log::LevelFilter::Info);
+    }
+
+    builder.init();
 
     let pool = database::connection::get_connection_pool();
 
