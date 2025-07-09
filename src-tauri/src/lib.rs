@@ -21,8 +21,10 @@ pub fn run() {
 
     let mut builder = env_logger::Builder::new();
 
+    builder.filter_level(log::LevelFilter::Info);
+
     if cli.verbose {
-        builder.filter_level(log::LevelFilter::Info);
+        builder.filter_level(log::LevelFilter::Trace);
     }
 
     builder.init();

@@ -228,7 +228,7 @@ pub async fn scan(
     }
 
     if let Err(e) = std::process::Command::new("magick").arg("--help").output() {
-        log::warn!("Failed to find magick command: {e}");
+        log::error!("Failed to find magick command: {e}");
         return Err(format!("Failed to find magick command: {e}"));
     }
 
