@@ -9,6 +9,7 @@ use clap::Parser;
 use cli::Cli;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use dotenvy::dotenv;
+use utils::restore;
 
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
 const APP_NAME: &str = "hypr-nitrogen";
@@ -33,6 +34,20 @@ pub fn run() {
             Ok(_) => {}
             Err(e) => panic!("Failed to run migrations: {e}"),
         }
+    }
+
+    if cli.restore {
+        if let Ok(mut conn) = pool.get() {
+            match restore(&mut conn) {
+                Ok(_) => log::info!("Wallpapers restored successfully"),
+                Err(e) => {
+                    log::error!("Failed to restore wallpapers: {e}");
+                    std::process::exit(1);
+                }
+            }
+        }
+
+        std::process::exit(0);
     }
 
     // NOTE:

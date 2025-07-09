@@ -5,4 +5,7 @@ use clap::Parser;
 pub struct Cli {
     #[arg(short, long)]
     pub verbose: bool,
+
+    #[arg(short, long)]
+    pub restore: bool,
 }
