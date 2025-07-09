@@ -6,7 +6,6 @@ mod set_wallpaper;
 mod unload;
 
 pub use active_screens::active_screens;
-pub use preload::preload;
 pub use set_wallpaper::set_wallpaper;
 pub use unload::unload;
 
@@ -56,8 +55,8 @@ pub enum Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Self::Os(e) => write!(f, "Os error: {}", e),
-            Self::Dispatch(e) => write!(f, "Dispatch error: {}", e),
+            Self::Os(e) => write!(f, "Os error: {e}"),
+            Self::Dispatch(e) => write!(f, "Dispatch error: {e}"),
             Self::JsonParsing => write!(f, "Json parsing error"),
         }
     }
@@ -103,7 +102,7 @@ impl fmt::Display for Unload {
         match self {
             Self::All => write!(f, "all"),
             Self::Unused => write!(f, "unused"),
-            Self::Path(path) => write!(f, "{}", path),
+            Self::Path(path) => write!(f, "{path}"),
         }
     }
 }

@@ -38,7 +38,7 @@ pub fn active_screens() -> Result<Vec<String>, Error> {
             }
         }
         Err(e) => {
-            log::error!("Failed to get active screens: {}", e);
+            log::error!("Failed to get active screens: {e}");
             return Err(Error::Os(e));
         }
     }

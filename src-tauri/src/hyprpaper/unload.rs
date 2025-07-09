@@ -12,24 +12,21 @@ pub fn unload(action: Unload) -> Result<(), Error> {
             if let Ok(text) = String::from_utf8(output.stdout.clone()) {
                 if text == UNKNOWN_REQUEST_ERROR {
                     log::error!(
-                        "Failed to unload wallpaper '{}': unknown request",
-                        action_string
+                        "Failed to unload wallpaper '{action_string}': unknown request"
                     );
                     return Err(Error::Dispatch(DispatchErrorKind::UnknownRequest));
                 }
 
                 if text != "ok\n" {
                     log::error!(
-                        "Failed to unload wallpaper '{}': Unexpected: {}",
-                        action_string,
-                        text
+                        "Failed to unload wallpaper '{action_string}': Unexpected: {text}"
                     );
                     return Err(Error::Dispatch(DispatchErrorKind::UnExpected));
                 }
             }
         }
         Err(e) => {
-            log::error!("Failed to unload wallpaper '{}': {}", action_string, e);
+            log::error!("Failed to unload wallpaper '{action_string}': {e}");
             return Err(Error::Os(e));
         }
     }
