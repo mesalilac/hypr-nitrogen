@@ -84,6 +84,9 @@ pub fn set_wallpaper(screen: String, wallpaper: String, mode: &Mode) -> Result<(
         }
 
         // hyprpaper will crash if you don't wait after setting the first wallpaper
+        // TODO: pass screens Vec and use `hyprctl --batch`
+        // https://wiki.hypr.land/Configuring/Using-hyprctl/#batch
+        // hyprctl --batch "keyword general:border_size 2 ; keyword general:gaps_out 20"
         std::thread::sleep(std::time::Duration::from_millis(100));
     }
 
