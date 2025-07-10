@@ -160,13 +160,15 @@ button {
 
 button {
     cursor: pointer;
+}
 
-    :hover {
-        border-color: #396cd8;
-    }
+button:hover,
+input:hover {
+    border-color: var(--primary);
+}
 
-    :active {
-        border-color: #396cd8;
-        background-color: #0f0f0f69;
-    }
+button:active,
+input:focus {
+    border-color: var(--primary);
+    background-color: #0f0f0f69;
 }
