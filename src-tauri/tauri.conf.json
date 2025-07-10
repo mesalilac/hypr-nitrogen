@@ -13,15 +13,20 @@
         "windows": [
             {
                 "title": "hypr-nitrogen",
-                "width": 800,
-                "height": 600
+                "width": 1300,
+                "height": 800,
+                "minWidth": 850,
+                "minHeight": 300
             }
         ],
         "security": {
             "csp": null,
             "assetProtocol": {
                 "enable": true,
-                "scope": ["$APPCACHE/**", "*/**"]
+                "scope": [
+                    "$APPCACHE/**",
+                    "*/**"
+                ]
             }
         }
     },
