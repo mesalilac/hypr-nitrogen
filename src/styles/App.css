@@ -57,14 +57,8 @@
 .thumbnails-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
     padding-top: 2rem;
-
-    & div {
-        margin: 5px;
-        padding: 10px;
-        text-overflow: ellipsis;
-        overflow: hidden;
-    }
 }
 
 .thumbnail {

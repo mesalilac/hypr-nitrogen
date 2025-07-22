@@ -18,20 +18,19 @@ function Thumbnail(props: Props) {
     const visible = useVisibilityObserver(() => imgRef);
 
     return (
-        <div onClick={props.onClick}>
-            <img
-                id={props.is_selected ? 'thumbnail-selected' : ''}
-                class={`thumbnail ${props.is_active ? 'thumbnail-active' : ''}`}
-                src={
-                    visible()
-                        ? convertFileSrc(props.wallpaper.thumbnail_path)
-                        : undefined
-                }
-                loading='lazy'
-                ref={imgRef}
-                onError={(e) => (e.currentTarget.src = fallbackImage)}
-            />
-        </div>
+        <img
+            id={props.is_selected ? 'thumbnail-selected' : ''}
+            class={`thumbnail ${props.is_active ? 'thumbnail-active' : ''}`}
+            src={
+                visible()
+                    ? convertFileSrc(props.wallpaper.thumbnail_path)
+                    : undefined
+            }
+            onClick={props.onClick}
+            loading='lazy'
+            ref={imgRef}
+            onError={(e) => (e.currentTarget.src = fallbackImage)}
+        />
     );
 }
 
