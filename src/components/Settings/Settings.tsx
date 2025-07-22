@@ -6,8 +6,7 @@ import WallpaperSource from '@components/WallpaperSource';
 import { useGlobalContext } from '@/store';
 
 function Settings() {
-    const { wallpapers, setWallpapers, showSettings, setShowSettings } =
-        useGlobalContext();
+    const { wallpapers, showSettings } = useGlobalContext();
     const [wallpaperSources, setWallpaperSources] = createSignal<
         ipc.types.WallpaperSource[]
     >([]);
@@ -23,7 +22,9 @@ function Settings() {
 
     function update_source_list(id: string) {
         setWallpaperSources(wallpaperSources().filter((x) => x.id !== id));
-        setWallpapers(wallpapers().filter((x) => x.wallpaper_source_id !== id));
+        wallpapers.set(
+            wallpapers.get().filter((x) => x.wallpaper_source_id !== id),
+        );
     }
 
     async function addSource() {
@@ -50,7 +51,7 @@ function Settings() {
                             },
                         )
                         .then((res2) => {
-                            setWallpapers([...wallpapers(), ...res2.data]);
+                            wallpapers.set([...wallpapers.get(), ...res2.data]);
                         })
                         .catch((e) => toast.error(e));
                 })
@@ -61,7 +62,7 @@ function Settings() {
     }
 
     return (
-        <Show when={showSettings()}>
+        <Show when={showSettings.get()}>
             <div class='settings-container'>
                 <div class='settings'>
                     <div class='settings-sources-list-header'>
@@ -79,7 +80,7 @@ function Settings() {
                                         update_source_list_fn={
                                             update_source_list
                                         }
-                                        setWallpapers={setWallpapers}
+                                        setWallpapers={wallpapers.set}
                                     />
                                 )}
                             </For>
@@ -95,7 +96,7 @@ function Settings() {
                     </div>
                     <button
                         class='settings-close-btn'
-                        onClick={() => setShowSettings(false)}
+                        onClick={() => showSettings.set(false)}
                     >
                         Close
                     </button>

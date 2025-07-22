@@ -6,18 +6,15 @@ import { useGlobalContext } from '@/store';
 
 function Header() {
     const {
-        setSelectedScreen,
-        setSelectedMode,
-        setWallpapers,
-        setActiveWallpapers,
+        showSettings,
         filteredItems,
         selectedScreen,
         selectedMode,
         selectedWallpaper,
         searchQuery,
-        setDebouncedSearchQuery,
-        setShowSettings,
-        setSearchQuery,
+        debouncedSearchQuery,
+        activeWallpapers,
+        wallpapers,
     } = useGlobalContext();
     const [screens, setScreens] = createSignal<string[]>();
     const [scanButtonActive, setScanButtonActive] = createSignal(true);
@@ -25,7 +22,7 @@ function Header() {
     const wallpaper_modes: ipc.types.Mode[] = ['default', 'contain', 'tile'];
 
     const debouncedPerformSearch = debounce(
-        (query: string) => setDebouncedSearchQuery(query),
+        (query: string) => debouncedSearchQuery.set(query),
         300,
     );
 
@@ -43,7 +40,7 @@ function Header() {
     });
 
     function setWallpaper(isTemporary: boolean, random_wallpaper: boolean) {
-        const selected_wallpaper = selectedWallpaper();
+        const selected_wallpaper = selectedWallpaper.get();
 
         if (
             (selected_wallpaper && selected_wallpaper !== undefined) ||
@@ -52,11 +49,11 @@ function Header() {
             toast
                 .promise(
                     ipc.set.wallpaper({
-                        screen: selectedScreen(),
+                        screen: selectedScreen.get(),
                         wallpaperId: random_wallpaper
                             ? undefined
                             : selected_wallpaper,
-                        mode: selectedMode(),
+                        mode: selectedMode.get(),
                         isTemporary: isTemporary,
                     }),
                     {
@@ -69,7 +66,7 @@ function Header() {
                     ipc.get
                         .active_wallpapers()
                         .then((res) => {
-                            setActiveWallpapers(res.data);
+                            activeWallpapers.set(res.data);
                         })
                         .catch((e) => toast.error(e));
                 })
@@ -80,7 +77,7 @@ function Header() {
     function handleSearchChange(e: Event) {
         const value = (e.target as HTMLInputElement).value;
 
-        setSearchQuery(value);
+        searchQuery.set(value);
         debouncedPerformSearch(value);
     }
 
@@ -103,7 +100,7 @@ function Header() {
                 error: 'Scan failed',
             })
             .then((res) => {
-                setWallpapers(res.data);
+                wallpapers.set(res.data);
             })
             .catch((e) => toast.error(e))
             .finally(() => setScanButtonActive(true));
@@ -115,12 +112,14 @@ function Header() {
                 <input
                     type='text'
                     placeholder='Search...'
-                    value={searchQuery()}
+                    value={searchQuery.get()}
                     onInput={handleSearchChange}
                 />
                 <select
                     onInput={(e) =>
-                        setSelectedScreen((e.target as HTMLSelectElement).value)
+                        selectedScreen.set(
+                            (e.target as HTMLSelectElement).value,
+                        )
                     }
                 >
                     <option value='all'>all</option>
@@ -130,7 +129,7 @@ function Header() {
                 </select>
                 <select
                     onInput={(e) =>
-                        setSelectedMode(
+                        selectedMode.set(
                             (e.target as HTMLSelectElement)
                                 .value as ipc.types.Mode,
                         )
@@ -150,7 +149,7 @@ function Header() {
                 <button disabled={!scanButtonActive()} onClick={scanAll}>
                     Scan
                 </button>
-                <button onClick={() => setShowSettings(true)}>Settings</button>
+                <button onClick={() => showSettings.set(true)}>Settings</button>
                 <button onClick={() => setWallpaper(false, false)}>Save</button>
             </div>
         </div>

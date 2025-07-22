@@ -6,42 +6,40 @@ import { useGlobalContext } from '@/store';
 
 function ThumbnailsList() {
     const {
-        setWallpapers,
-        setActiveWallpapers,
         filteredItems,
-        setSelectedWallpaper,
         selectedScreen,
         selectedMode,
         selectedWallpaper,
         activeWallpapers,
         searchQuery,
+        wallpapers,
     } = useGlobalContext();
 
     onMount(async () => {
         ipc.get
             .wallpapers()
             .then((res) => {
-                setWallpapers(res.data);
+                wallpapers.set(res.data);
             })
             .catch((e) => toast.error(e));
         ipc.get
             .active_wallpapers()
             .then((res) => {
-                setActiveWallpapers(res.data);
+                activeWallpapers.set(res.data);
             })
             .catch((e) => toast.error(e));
     });
 
     function handleThumbnailClick(id: string) {
-        setSelectedWallpaper(id);
+        selectedWallpaper.set(id);
 
         // set temporary wallpaper
         toast
             .promise(
                 ipc.set.wallpaper({
-                    screen: selectedScreen(),
-                    wallpaperId: selectedWallpaper(),
-                    mode: selectedMode(),
+                    screen: selectedScreen.get(),
+                    wallpaperId: selectedWallpaper.get(),
+                    mode: selectedMode.get(),
                     isTemporary: true,
                 }),
                 {
@@ -54,7 +52,7 @@ function ThumbnailsList() {
                 ipc.get
                     .active_wallpapers()
                     .then((res) => {
-                        setActiveWallpapers(res.data);
+                        activeWallpapers.set(res.data);
                     })
                     .catch((e) => toast.error(e));
             })
@@ -67,13 +65,15 @@ function ThumbnailsList() {
                 {(x) => {
                     return (
                         <Thumbnail
-                            is_active={activeWallpapers().some(
-                                (y) =>
-                                    y.wallpaper_id === x.id &&
-                                    (y.screen === selectedScreen() ||
-                                        selectedScreen() === 'all'),
-                            )}
-                            is_selected={x.id === selectedWallpaper()}
+                            is_active={activeWallpapers
+                                .get()
+                                .some(
+                                    (y) =>
+                                        y.wallpaper_id === x.id &&
+                                        (y.screen === selectedScreen.get() ||
+                                            selectedScreen.get() === 'all'),
+                                )}
+                            is_selected={x.id === selectedWallpaper.get()}
                             wallpaper={x}
                             onClick={() => handleThumbnailClick(x.id)}
                         />
@@ -81,12 +81,14 @@ function ThumbnailsList() {
                 }}
             </For>
             <Switch>
-                <Match when={filteredItems().length === 0 && !searchQuery()}>
+                <Match
+                    when={filteredItems().length === 0 && !searchQuery.get()}
+                >
                     <div>
                         No wallpapers found. Add a source in the settings.
                     </div>
                 </Match>
-                <Match when={filteredItems().length === 0 && searchQuery()}>
+                <Match when={filteredItems().length === 0 && searchQuery.get()}>
                     <div>{filteredItems().length} wallpapers found</div>
                 </Match>
             </Switch>

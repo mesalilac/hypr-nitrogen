@@ -20,7 +20,10 @@
                 "./src/ipc"
             ],
             "@store": [
-                "./src/store.tsx"
+                "./src/store"
+            ],
+            "@utils": [
+                "./src/utils"
             ],
             "@assets/*": [
                 "./src/assets/*"
