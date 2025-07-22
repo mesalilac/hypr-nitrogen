@@ -55,7 +55,6 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, 400px);
     gap: 2rem;
-    padding-top: 2rem;
 }
 
 .thumbnail {
