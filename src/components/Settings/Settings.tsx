@@ -1,27 +1,28 @@
 import * as ipc from '@ipc';
-import { Match, Switch, For, createSignal, onMount, Show } from 'solid-js';
+import { Match, Switch, For, onMount, Show } from 'solid-js';
 import { open } from '@tauri-apps/plugin-dialog';
 import toast from 'solid-toast';
 import WallpaperSource from '@components/WallpaperSource';
 import { useGlobalContext } from '@/store';
+import { createSignalObject } from '@/utils';
 
 function Settings() {
     const { wallpapers, showSettings } = useGlobalContext();
-    const [wallpaperSources, setWallpaperSources] = createSignal<
-        ipc.types.WallpaperSource[]
-    >([]);
+    const wallpaperSources = createSignalObject<ipc.types.WallpaperSource[]>(
+        [],
+    );
 
     onMount(() => {
         ipc.get
             .wallpaper_sources()
             .then((res) => {
-                setWallpaperSources(res.data);
+                wallpaperSources.set(res.data);
             })
             .catch((e) => toast.error(e));
     });
 
     function update_source_list(id: string) {
-        setWallpaperSources(wallpaperSources().filter((x) => x.id !== id));
+        wallpaperSources.set(wallpaperSources.get().filter((x) => x.id !== id));
         wallpapers.set(
             wallpapers.get().filter((x) => x.wallpaper_source_id !== id),
         );
@@ -40,7 +41,10 @@ function Settings() {
                     error: 'Failed to add source',
                 })
                 .then((res) => {
-                    setWallpaperSources([...wallpaperSources(), res.data!]);
+                    wallpaperSources.set([
+                        ...wallpaperSources.get(),
+                        res.data!,
+                    ]);
                     toast
                         .promise(
                             ipc.util.scan_source({ sourceId: res.data.id }),
@@ -71,7 +75,7 @@ function Settings() {
                     </div>
                     <div class='wallpaper-sources-list'>
                         <div>
-                            <For each={wallpaperSources()}>
+                            <For each={wallpaperSources.get()}>
                                 {(x) => (
                                     <WallpaperSource
                                         id={x.id}
@@ -85,7 +89,9 @@ function Settings() {
                                 )}
                             </For>
                             <Switch>
-                                <Match when={wallpaperSources().length === 0}>
+                                <Match
+                                    when={wallpaperSources.get().length === 0}
+                                >
                                     <div>
                                         No wallpaper sources found. Add a
                                         source.
