@@ -40,7 +40,7 @@
     justify-content: space-between;
     align-items: center;
     position: sticky;
-    top: 1rem;
+    top: 0;
     background-color: var(--bg-light);
     padding: 0.5rem;
 }
