@@ -1,32 +1,47 @@
-import { For, Switch, Match, Accessor, Setter } from 'solid-js';
+import { For, Switch, Match, onMount } from 'solid-js';
 import toast from 'solid-toast';
 import * as ipc from '@ipc';
 import Thumbnail from '@components/Thumbnail';
+import { useGlobalContext } from '@/store';
 
-interface Props {
-    activeWallpapers: Accessor<ipc.types.Active[]>;
-    filteredItems: Accessor<ipc.types.Wallpaper[]>;
-    selectedScreen: Accessor<string>;
-    selectedWallpaper: Accessor<string>;
-    selectedMode: Accessor<ipc.types.Mode>;
-    searchQuery: Accessor<string>;
-    setSelectedWallpaper: Setter<string>;
-    setSelectedScreen: Setter<string>;
+function ThumbnailsList() {
+    const {
+        setWallpapers,
+        setActiveWallpapers,
+        filteredItems,
+        setSelectedWallpaper,
+        selectedScreen,
+        selectedMode,
+        selectedWallpaper,
+        activeWallpapers,
+        searchQuery,
+    } = useGlobalContext();
 
-    fetch_active_wallpapers: () => void;
-}
+    onMount(async () => {
+        ipc.get
+            .wallpapers()
+            .then((res) => {
+                setWallpapers(res.data);
+            })
+            .catch((e) => toast.error(e));
+        ipc.get
+            .active_wallpapers()
+            .then((res) => {
+                setActiveWallpapers(res.data);
+            })
+            .catch((e) => toast.error(e));
+    });
 
-function ThumbnailsList(props: Props) {
     function handleThumbnailClick(id: string) {
-        props.setSelectedWallpaper(id);
+        setSelectedWallpaper(id);
 
         // set temporary wallpaper
         toast
             .promise(
                 ipc.set.wallpaper({
-                    screen: props.selectedScreen(),
-                    wallpaperId: props.selectedWallpaper(),
-                    mode: props.selectedMode(),
+                    screen: selectedScreen(),
+                    wallpaperId: selectedWallpaper(),
+                    mode: selectedMode(),
                     isTemporary: true,
                 }),
                 {
@@ -36,26 +51,29 @@ function ThumbnailsList(props: Props) {
                 },
             )
             .then(() => {
-                props.fetch_active_wallpapers();
+                ipc.get
+                    .active_wallpapers()
+                    .then((res) => {
+                        setActiveWallpapers(res.data);
+                    })
+                    .catch((e) => toast.error(e));
             })
             .catch((e) => toast.error(e));
     }
 
     return (
         <div class='thumbnails-list'>
-            <For each={props.filteredItems()}>
+            <For each={filteredItems()}>
                 {(x) => {
                     return (
                         <Thumbnail
-                            is_active={props
-                                .activeWallpapers()
-                                .some(
-                                    (y) =>
-                                        y.wallpaper_id === x.id &&
-                                        (y.screen === props.selectedScreen() ||
-                                            props.selectedScreen() === 'all'),
-                                )}
-                            is_selected={x.id === props.selectedWallpaper()}
+                            is_active={activeWallpapers().some(
+                                (y) =>
+                                    y.wallpaper_id === x.id &&
+                                    (y.screen === selectedScreen() ||
+                                        selectedScreen() === 'all'),
+                            )}
+                            is_selected={x.id === selectedWallpaper()}
                             wallpaper={x}
                             onClick={() => handleThumbnailClick(x.id)}
                         />
@@ -63,23 +81,13 @@ function ThumbnailsList(props: Props) {
                 }}
             </For>
             <Switch>
-                <Match
-                    when={
-                        props.filteredItems().length === 0 &&
-                        !props.searchQuery()
-                    }
-                >
+                <Match when={filteredItems().length === 0 && !searchQuery()}>
                     <div>
                         No wallpapers found. Add a source in the settings.
                     </div>
                 </Match>
-                <Match
-                    when={
-                        props.filteredItems().length === 0 &&
-                        props.searchQuery()
-                    }
-                >
-                    <div>{props.filteredItems().length} wallpapers found</div>
+                <Match when={filteredItems().length === 0 && searchQuery()}>
+                    <div>{filteredItems().length} wallpapers found</div>
                 </Match>
             </Switch>
         </div>

@@ -4,9 +4,10 @@ import {
     Accessor,
     Setter,
     createMemo,
+    createContext,
+    useContext,
 } from 'solid-js';
 import * as ipc from '@ipc';
-import { createContext, useContext } from 'solid-js/types/server/reactive.js';
 
 interface ContextProps {
     selectedScreen: Accessor<string>;
@@ -82,4 +83,4 @@ export function GlobalContextProvider(props: { children: JSXElement }) {
     );
 }
 
-export const useGlobalContext = () => useContext(GlobalContext);
+export const useGlobalContext = () => useContext(GlobalContext)!;

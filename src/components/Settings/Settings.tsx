@@ -1,25 +1,13 @@
 import * as ipc from '@ipc';
-import {
-    Match,
-    Switch,
-    For,
-    Accessor,
-    Setter,
-    createSignal,
-    onMount,
-} from 'solid-js';
+import { Match, Switch, For, createSignal, onMount, Show } from 'solid-js';
 import { open } from '@tauri-apps/plugin-dialog';
 import toast from 'solid-toast';
 import WallpaperSource from '@components/WallpaperSource';
+import { useGlobalContext } from '@/store';
 
-interface Props {
-    setShowSettings: Setter<boolean>;
-
-    wallpapers: Accessor<ipc.types.Wallpaper[]>;
-    setWallpapers: Setter<ipc.types.Wallpaper[]>;
-}
-
-function Settings(props: Props) {
+function Settings() {
+    const { wallpapers, setWallpapers, showSettings, setShowSettings } =
+        useGlobalContext();
     const [wallpaperSources, setWallpaperSources] = createSignal<
         ipc.types.WallpaperSource[]
     >([]);
@@ -35,9 +23,7 @@ function Settings(props: Props) {
 
     function update_source_list(id: string) {
         setWallpaperSources(wallpaperSources().filter((x) => x.id !== id));
-        props.setWallpapers(
-            props.wallpapers().filter((x) => x.wallpaper_source_id !== id),
-        );
+        setWallpapers(wallpapers().filter((x) => x.wallpaper_source_id !== id));
     }
 
     async function addSource() {
@@ -64,10 +50,7 @@ function Settings(props: Props) {
                             },
                         )
                         .then((res2) => {
-                            props.setWallpapers([
-                                ...props.wallpapers(),
-                                ...res2.data,
-                            ]);
+                            setWallpapers([...wallpapers(), ...res2.data]);
                         })
                         .catch((e) => toast.error(e));
                 })
@@ -78,42 +61,47 @@ function Settings(props: Props) {
     }
 
     return (
-        <div class='settings-container'>
-            <div class='settings'>
-                <div class='settings-sources-list-header'>
-                    <span>Sources list</span>
-                    <button onClick={addSource}>+</button>
-                </div>
-                <div class='wallpaper-sources-list'>
-                    <div>
-                        <For each={wallpaperSources()}>
-                            {(x) => (
-                                <WallpaperSource
-                                    id={x.id}
-                                    path={x.path}
-                                    active={x.active}
-                                    update_source_list_fn={update_source_list}
-                                    setWallpapers={props.setWallpapers}
-                                />
-                            )}
-                        </For>
-                        <Switch>
-                            <Match when={wallpaperSources().length === 0}>
-                                <div>
-                                    No wallpaper sources found. Add a source.
-                                </div>
-                            </Match>
-                        </Switch>
+        <Show when={showSettings()}>
+            <div class='settings-container'>
+                <div class='settings'>
+                    <div class='settings-sources-list-header'>
+                        <span>Sources list</span>
+                        <button onClick={addSource}>+</button>
                     </div>
+                    <div class='wallpaper-sources-list'>
+                        <div>
+                            <For each={wallpaperSources()}>
+                                {(x) => (
+                                    <WallpaperSource
+                                        id={x.id}
+                                        path={x.path}
+                                        active={x.active}
+                                        update_source_list_fn={
+                                            update_source_list
+                                        }
+                                        setWallpapers={setWallpapers}
+                                    />
+                                )}
+                            </For>
+                            <Switch>
+                                <Match when={wallpaperSources().length === 0}>
+                                    <div>
+                                        No wallpaper sources found. Add a
+                                        source.
+                                    </div>
+                                </Match>
+                            </Switch>
+                        </div>
+                    </div>
+                    <button
+                        class='settings-close-btn'
+                        onClick={() => setShowSettings(false)}
+                    >
+                        Close
+                    </button>
                 </div>
-                <button
-                    class='settings-close-btn'
-                    onClick={() => props.setShowSettings(false)}
-                >
-                    Close
-                </button>
             </div>
-        </div>
+        </Show>
     );
 }
 

@@ -1,40 +1,31 @@
-import {
-    Accessor,
-    Setter,
-    createSignal,
-    For,
-    onMount,
-    onCleanup,
-} from 'solid-js';
+import { createSignal, For, onMount, onCleanup } from 'solid-js';
 import { debounce } from '@solid-primitives/scheduled';
 import * as ipc from '@ipc';
 import toast from 'solid-toast';
+import { useGlobalContext } from '@/store';
 
-interface Props {
-    selectedScreen: Accessor<string>;
-    setSelectedScreen: Setter<string>;
-    selectedMode: Accessor<ipc.types.Mode>;
-    setSelectedMode: Setter<ipc.types.Mode>;
-    selectedWallpaper: Accessor<string>;
-    setSearchQuery: Setter<string>;
-    searchQuery: Accessor<string>;
-    filteredItems: Accessor<ipc.types.Wallpaper[]>;
-    wallpapers: Accessor<ipc.types.Wallpaper[]>;
-    setWallpapers: Setter<ipc.types.Wallpaper[]>;
-    setShowSettings: Setter<boolean>;
-    setDebouncedSearchQuery: Setter<string>;
-
-    fetch_active_wallpapers: () => void;
-}
-
-function Header(props: Props) {
+function Header() {
+    const {
+        setSelectedScreen,
+        setSelectedMode,
+        setWallpapers,
+        setActiveWallpapers,
+        filteredItems,
+        selectedScreen,
+        selectedMode,
+        selectedWallpaper,
+        searchQuery,
+        setDebouncedSearchQuery,
+        setShowSettings,
+        setSearchQuery,
+    } = useGlobalContext();
     const [screens, setScreens] = createSignal<string[]>();
     const [scanButtonActive, setScanButtonActive] = createSignal(true);
 
     const wallpaper_modes: ipc.types.Mode[] = ['default', 'contain', 'tile'];
 
     const debouncedPerformSearch = debounce(
-        (query: string) => props.setDebouncedSearchQuery(query),
+        (query: string) => setDebouncedSearchQuery(query),
         300,
     );
 
@@ -52,7 +43,7 @@ function Header(props: Props) {
     });
 
     function setWallpaper(isTemporary: boolean, random_wallpaper: boolean) {
-        const selected_wallpaper = props.selectedWallpaper();
+        const selected_wallpaper = selectedWallpaper();
 
         if (
             (selected_wallpaper && selected_wallpaper !== undefined) ||
@@ -61,11 +52,11 @@ function Header(props: Props) {
             toast
                 .promise(
                     ipc.set.wallpaper({
-                        screen: props.selectedScreen(),
+                        screen: selectedScreen(),
                         wallpaperId: random_wallpaper
                             ? undefined
                             : selected_wallpaper,
-                        mode: props.selectedMode(),
+                        mode: selectedMode(),
                         isTemporary: isTemporary,
                     }),
                     {
@@ -75,7 +66,12 @@ function Header(props: Props) {
                     },
                 )
                 .then(() => {
-                    props.fetch_active_wallpapers();
+                    ipc.get
+                        .active_wallpapers()
+                        .then((res) => {
+                            setActiveWallpapers(res.data);
+                        })
+                        .catch((e) => toast.error(e));
                 })
                 .catch((e) => toast.error(e));
         }
@@ -84,7 +80,7 @@ function Header(props: Props) {
     function handleSearchChange(e: Event) {
         const value = (e.target as HTMLInputElement).value;
 
-        props.setSearchQuery(value);
+        setSearchQuery(value);
         debouncedPerformSearch(value);
     }
 
@@ -107,7 +103,7 @@ function Header(props: Props) {
                 error: 'Scan failed',
             })
             .then((res) => {
-                props.setWallpapers(res.data);
+                setWallpapers(res.data);
             })
             .catch((e) => toast.error(e))
             .finally(() => setScanButtonActive(true));
@@ -119,14 +115,12 @@ function Header(props: Props) {
                 <input
                     type='text'
                     placeholder='Search...'
-                    value={props.searchQuery()}
+                    value={searchQuery()}
                     onInput={handleSearchChange}
                 />
                 <select
                     onInput={(e) =>
-                        props.setSelectedScreen(
-                            (e.target as HTMLSelectElement).value,
-                        )
+                        setSelectedScreen((e.target as HTMLSelectElement).value)
                     }
                 >
                     <option value='all'>all</option>
@@ -136,7 +130,7 @@ function Header(props: Props) {
                 </select>
                 <select
                     onInput={(e) =>
-                        props.setSelectedMode(
+                        setSelectedMode(
                             (e.target as HTMLSelectElement)
                                 .value as ipc.types.Mode,
                         )
@@ -147,7 +141,7 @@ function Header(props: Props) {
                     </For>
                 </select>
             </div>
-            <span>{props.filteredItems().length} wallpapers</span>
+            <span>{filteredItems().length} wallpapers</span>
             <div class='header-right'>
                 <button onClick={() => setWallpaper(false, true)}>
                     Random
@@ -156,9 +150,7 @@ function Header(props: Props) {
                 <button disabled={!scanButtonActive()} onClick={scanAll}>
                     Scan
                 </button>
-                <button onClick={() => props.setShowSettings(true)}>
-                    Settings
-                </button>
+                <button onClick={() => setShowSettings(true)}>Settings</button>
                 <button onClick={() => setWallpaper(false, false)}>Save</button>
             </div>
         </div>
