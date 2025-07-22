@@ -1,7 +1,7 @@
-import { convertFileSrc } from '@tauri-apps/api/core';
 import fallbackImage from '@assets/fallback-image.svg';
 import * as ipc from '@ipc';
 import { createVisibilityObserver } from '@solid-primitives/intersection-observer';
+import { convertFileSrc } from '@tauri-apps/api/core';
 
 interface Props {
     wallpaper: ipc.types.Wallpaper;

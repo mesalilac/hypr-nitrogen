@@ -1,4 +1,4 @@
-import { createSignal, Accessor, Setter } from 'solid-js';
+import { Accessor, createSignal, Setter } from 'solid-js';
 
 export type SignalObject<T> = {
     get: Accessor<T>;

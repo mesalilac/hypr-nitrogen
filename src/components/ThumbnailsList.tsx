@@ -1,7 +1,7 @@
-import { For, Switch, Match, onMount } from 'solid-js';
-import toast from 'solid-toast';
-import * as ipc from '@ipc';
 import Thumbnail from '@components/Thumbnail';
+import * as ipc from '@ipc';
+import { For, Match, onMount, Switch } from 'solid-js';
+import toast from 'solid-toast';
 import { useGlobalContext } from '@/store';
 
 function ThumbnailsList() {

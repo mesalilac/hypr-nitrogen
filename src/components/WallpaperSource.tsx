@@ -1,5 +1,5 @@
-import { createSignal, Setter } from 'solid-js';
 import * as ipc from '@ipc';
+import { createSignal, Setter } from 'solid-js';
 import toast from 'solid-toast';
 
 interface Props {

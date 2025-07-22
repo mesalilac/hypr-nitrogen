@@ -1,12 +1,12 @@
-import {
-    JSXElement,
-    Accessor,
-    createMemo,
-    createContext,
-    useContext,
-} from 'solid-js';
 import * as ipc from '@ipc';
 import { createSignalObject, SignalObject } from '@utils';
+import {
+    Accessor,
+    createContext,
+    createMemo,
+    JSXElement,
+    useContext,
+} from 'solid-js';
 
 interface ContextProps {
     selectedScreen: SignalObject<string>;

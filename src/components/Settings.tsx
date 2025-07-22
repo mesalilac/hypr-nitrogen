@@ -1,8 +1,8 @@
-import * as ipc from '@ipc';
-import { Match, Switch, For, onMount, Show } from 'solid-js';
-import { open } from '@tauri-apps/plugin-dialog';
-import toast from 'solid-toast';
 import WallpaperSource from '@components/WallpaperSource';
+import * as ipc from '@ipc';
+import { open } from '@tauri-apps/plugin-dialog';
+import { For, Match, onMount, Show, Switch } from 'solid-js';
+import toast from 'solid-toast';
 import { useGlobalContext } from '@/store';
 import { createSignalObject } from '@/utils';
 
