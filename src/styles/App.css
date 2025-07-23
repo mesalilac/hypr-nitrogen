@@ -139,6 +139,7 @@ select:active {
     bottom: 1rem;
     right: 1rem;
     cursor: pointer;
+    color: var(--text-muted);
 }
 
 .wallpaper-sources-list {
