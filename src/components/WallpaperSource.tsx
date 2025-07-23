@@ -1,6 +1,7 @@
 import * as ipc from '@ipc';
 import { createSignal, Setter } from 'solid-js';
 import toast from 'solid-toast';
+import { RemoveIcon } from '@/icons';
 
 interface Props {
     id: string;
@@ -48,7 +49,9 @@ function WallpaperSource(props: Props) {
                 onChange={(e) => handleCheckboxChange(e.currentTarget.checked)}
             />
             <span>{props.path}</span>
-            <button onClick={handleSourceRemove}>x</button>
+            <button onClick={handleSourceRemove}>
+                <RemoveIcon />
+            </button>
         </div>
     );
 }
