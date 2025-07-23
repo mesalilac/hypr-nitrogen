@@ -59,7 +59,7 @@ select:active {
     align-items: center;
     position: sticky;
     top: 0;
-    background-color: var(--bg-light);
+    background-color: hsl(212deg 9% 9% / 85%);
     padding: 0.5rem;
 }
 
