@@ -93,6 +93,7 @@ select:active {
     object-fit: cover;
     border: 8px solid transparent;
     cursor: pointer;
+    transition: border 0.2s ease-in-out;
 }
 
 .thumbnail:hover {
