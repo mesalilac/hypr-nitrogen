@@ -1,10 +1,10 @@
-import Thumbnail from '@components/Thumbnail';
+import { Thumbnail } from '@components';
 import * as ipc from '@ipc';
 import { For, Match, onMount, Switch } from 'solid-js';
 import toast from 'solid-toast';
 import { useGlobalContext } from '@/store';
 
-function ThumbnailsList() {
+export function ThumbnailsList() {
     const {
         filteredItems,
         selectedScreen,
@@ -95,5 +95,3 @@ function ThumbnailsList() {
         </div>
     );
 }
-
-export default ThumbnailsList;

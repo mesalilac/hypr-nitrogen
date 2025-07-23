@@ -12,7 +12,7 @@ import { createSignal, For, onCleanup, onMount } from 'solid-js';
 import toast from 'solid-toast';
 import { useGlobalContext } from '@/store';
 
-function Header() {
+export function Header() {
     const {
         showSettings,
         filteredItems,
@@ -184,5 +184,3 @@ function Header() {
         </div>
     );
 }
-
-export default Header;

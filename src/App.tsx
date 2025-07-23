@@ -1,6 +1,4 @@
-import Header from '@components/Header';
-import Settings from '@components/Settings';
-import ThumbnailsList from '@components/ThumbnailsList';
+import { Header, Settings, ThumbnailsList } from '@components';
 import { Toaster } from 'solid-toast';
 import '@styles/App.css';
 import { GlobalContextProvider } from './store';

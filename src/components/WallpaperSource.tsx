@@ -11,7 +11,7 @@ interface Props {
     setWallpapers: Setter<ipc.types.Wallpaper[]>;
 }
 
-function WallpaperSource(props: Props) {
+export function WallpaperSource(props: Props) {
     const [active, setActive] = createSignal(props.active);
 
     function handleCheckboxChange(v: boolean) {
@@ -55,5 +55,3 @@ function WallpaperSource(props: Props) {
         </div>
     );
 }
-
-export default WallpaperSource;

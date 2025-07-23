@@ -1,4 +1,4 @@
-import WallpaperSource from '@components/WallpaperSource';
+import { WallpaperSource } from '@components';
 import * as ipc from '@ipc';
 import { open } from '@tauri-apps/plugin-dialog';
 import { For, Match, onMount, Show, Switch } from 'solid-js';
@@ -7,7 +7,7 @@ import { AddIcon } from '@/icons';
 import { useGlobalContext } from '@/store';
 import { createSignalObject } from '@/utils';
 
-function Settings() {
+export function Settings() {
     const { wallpapers, showSettings } = useGlobalContext();
     const wallpaperSources = createSignalObject<ipc.types.WallpaperSource[]>(
         [],
@@ -114,5 +114,3 @@ function Settings() {
         </Show>
     );
 }
-
-export default Settings;

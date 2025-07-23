@@ -10,7 +10,7 @@ interface Props {
     onClick: () => void;
 }
 
-function Thumbnail(props: Props) {
+export function Thumbnail(props: Props) {
     let imgRef: HTMLImageElement | undefined;
 
     const useVisibilityObserver = createVisibilityObserver({ threshold: 0.2 });
@@ -33,5 +33,3 @@ function Thumbnail(props: Props) {
         />
     );
 }
-
-export default Thumbnail;
