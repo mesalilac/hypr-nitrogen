@@ -108,7 +108,7 @@ function Header() {
 
     return (
         <div class='header'>
-            <div>
+            <div class='header-left'>
                 <input
                     type='text'
                     placeholder='Search...'

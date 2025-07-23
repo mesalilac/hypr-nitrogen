@@ -45,6 +45,16 @@
     padding: 0.5rem;
 }
 
+.header-left {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+
+    select {
+        align-self: center;
+    }
+}
+
 .header-right {
     display: flex;
     flex-direction: row;
