@@ -7,7 +7,7 @@ import { GlobalContextProvider } from './store';
 
 function App() {
     return (
-        <main class='container'>
+        <main>
             <GlobalContextProvider>
                 <Toaster position='bottom-right' />
                 <Header />

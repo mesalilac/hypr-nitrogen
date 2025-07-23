@@ -1,3 +1,11 @@
+import {
+    RandomIcon,
+    RestoreIcon,
+    SaveIcon,
+    ScanIcon,
+    SearchIcon,
+    SettingsIcon,
+} from '@icons';
 import * as ipc from '@ipc';
 import { debounce } from '@solid-primitives/scheduled';
 import { createSignal, For, onCleanup, onMount } from 'solid-js';
@@ -108,13 +116,28 @@ function Header() {
 
     return (
         <div class='header'>
-            <div>
-                <input
-                    type='text'
-                    placeholder='Search...'
-                    value={searchQuery.get()}
-                    onInput={handleSearchChange}
-                />
+            <div class='header-left'>
+                <div>
+                    <input
+                        type='text'
+                        placeholder='Search...'
+                        value={searchQuery.get()}
+                        onInput={handleSearchChange}
+                        style={{
+                            padding: '10px 10px 10px 40px',
+                        }}
+                    />
+                    <SearchIcon
+                        style={{
+                            position: 'absolute',
+                            left: '20px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            width: '18px',
+                            height: '18px',
+                        }}
+                    />
+                </div>
                 <select
                     onInput={(e) =>
                         selectedScreen.set(
@@ -143,14 +166,20 @@ function Header() {
             <span>{filteredItems().length} wallpapers</span>
             <div class='header-right'>
                 <button onClick={() => setWallpaper(false, true)}>
-                    Random
+                    <RandomIcon />
                 </button>
-                <button onClick={restoreWallpapers}>Restore</button>
+                <button onClick={restoreWallpapers}>
+                    <RestoreIcon />
+                </button>
                 <button disabled={!scanButtonActive()} onClick={scanAll}>
-                    Scan
+                    <ScanIcon />
                 </button>
-                <button onClick={() => showSettings.set(true)}>Settings</button>
-                <button onClick={() => setWallpaper(false, false)}>Save</button>
+                <button onClick={() => showSettings.set(true)}>
+                    <SettingsIcon />
+                </button>
+                <button onClick={() => setWallpaper(false, false)}>
+                    <SaveIcon />
+                </button>
             </div>
         </div>
     );

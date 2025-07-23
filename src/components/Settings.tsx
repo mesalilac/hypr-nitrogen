@@ -3,6 +3,7 @@ import * as ipc from '@ipc';
 import { open } from '@tauri-apps/plugin-dialog';
 import { For, Match, onMount, Show, Switch } from 'solid-js';
 import toast from 'solid-toast';
+import { AddIcon } from '@/icons';
 import { useGlobalContext } from '@/store';
 import { createSignalObject } from '@/utils';
 
@@ -71,7 +72,9 @@ function Settings() {
                 <div class='settings'>
                     <div class='settings-sources-list-header'>
                         <span>Sources list</span>
-                        <button onClick={addSource}>+</button>
+                        <button onClick={addSource}>
+                            <AddIcon />
+                        </button>
                     </div>
                     <div class='wallpaper-sources-list'>
                         <div>
