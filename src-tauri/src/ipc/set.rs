@@ -36,7 +36,12 @@ pub async fn cmd_set_wallpaper(
                 Err(e) => return Err(e.to_string()),
             }
         }
-        None => match schema::wallpapers::table.get_results::<Wallpaper>(&mut conn) {
+        None => match schema::wallpapers::table
+            .inner_join(schema::wallpaper_sources::table)
+            .filter(schema::wallpaper_sources::dsl::active.eq(true))
+            .select(schema::wallpapers::all_columns)
+            .get_results::<Wallpaper>(&mut conn)
+        {
             Ok(v) => {
                 let mut rng = rand::rng();
                 let r = rng.random_range(0..v.len());
