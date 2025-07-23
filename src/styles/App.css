@@ -95,6 +95,10 @@ select:active {
     cursor: pointer;
 }
 
+.thumbnail:hover {
+    border: 8px solid var(--border);
+}
+
 #thumbnail-selected {
     border: 8px solid #224da5ff;
 }
