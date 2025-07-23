@@ -22,13 +22,6 @@ export function Settings() {
             .catch((e) => toast.error(e));
     });
 
-    function update_source_list(id: string) {
-        wallpaperSources.set(wallpaperSources.get().filter((x) => x.id !== id));
-        wallpapers.set(
-            wallpapers.get().filter((x) => x.wallpaper_source_id !== id),
-        );
-    }
-
     async function addSource() {
         const directory = await open({
             directory: true,
@@ -84,9 +77,7 @@ export function Settings() {
                                         id={x.id}
                                         path={x.path}
                                         active={x.active}
-                                        update_source_list_fn={
-                                            update_source_list
-                                        }
+                                        wallpaperSources={wallpaperSources}
                                         setWallpapers={wallpapers.set}
                                     />
                                 )}

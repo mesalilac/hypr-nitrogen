@@ -2,17 +2,20 @@ import * as ipc from '@ipc';
 import { createSignal, Setter } from 'solid-js';
 import toast from 'solid-toast';
 import { RemoveIcon } from '@/icons';
+import { useGlobalContext } from '@/store';
+import { SignalObject } from '@/utils';
 
 interface Props {
     id: string;
     path: string;
     active: boolean;
-    update_source_list_fn: (id: string) => void;
+    wallpaperSources: SignalObject<ipc.types.WallpaperSource[]>;
     setWallpapers: Setter<ipc.types.Wallpaper[]>;
 }
 
 export function WallpaperSource(props: Props) {
     const [active, setActive] = createSignal(props.active);
+    const { wallpapers } = useGlobalContext();
 
     function handleCheckboxChange(v: boolean) {
         setActive(v);
@@ -36,7 +39,16 @@ export function WallpaperSource(props: Props) {
         ipc.remove
             .wallpaper_source({ id: props.id })
             .then((res) => {
-                props.update_source_list_fn(res.data.id);
+                props.wallpaperSources.set(
+                    props.wallpaperSources
+                        .get()
+                        .filter((x) => x.id !== res.data.id),
+                );
+                wallpapers.set(
+                    wallpapers
+                        .get()
+                        .filter((x) => x.wallpaper_source_id !== res.data.id),
+                );
             })
             .catch((e) => toast.error(e));
     }
