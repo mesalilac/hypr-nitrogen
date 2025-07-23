@@ -43,6 +43,10 @@ pub async fn cmd_set_wallpaper(
             .get_results::<Wallpaper>(&mut conn)
         {
             Ok(v) => {
+                if v.is_empty() {
+                    return Err(String::from("No wallpapers found"));
+                }
+
                 let mut rng = rand::rng();
                 let r = rng.random_range(0..v.len());
 
