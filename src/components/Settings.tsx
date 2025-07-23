@@ -65,7 +65,7 @@ export function Settings() {
                 <div class='settings'>
                     <div class='settings-sources-list-header'>
                         <span>Sources list</span>
-                        <button onClick={addSource}>
+                        <button onClick={addSource} title='Add new source'>
                             <AddIcon />
                         </button>
                     </div>
@@ -97,6 +97,7 @@ export function Settings() {
                     <button
                         class='settings-close-btn'
                         onClick={() => showSettings.set(false)}
+                        title='Close settings menu'
                     >
                         Close
                     </button>

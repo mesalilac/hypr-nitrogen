@@ -30,6 +30,7 @@ export function Thumbnail(props: Props) {
             loading='lazy'
             ref={imgRef}
             onError={(e) => (e.currentTarget.src = fallbackImage)}
+            title={props.wallpaper.keywords}
         />
     );
 }

@@ -126,6 +126,7 @@ export function Header() {
                         style={{
                             padding: '10px 10px 10px 40px',
                         }}
+                        title='Search wallpapers'
                     />
                     <SearchIcon
                         style={{
@@ -144,6 +145,7 @@ export function Header() {
                             (e.target as HTMLSelectElement).value,
                         )
                     }
+                    title='Select screen'
                 >
                     <option value='all'>all</option>
                     <For each={screens()}>
@@ -157,6 +159,7 @@ export function Header() {
                                 .value as ipc.types.Mode,
                         )
                     }
+                    title='Select wallpaper mode'
                 >
                     <For each={wallpaper_modes}>
                         {(x) => <option value={x}>{x}</option>}
@@ -165,19 +168,35 @@ export function Header() {
             </div>
             <span>{filteredItems().length} wallpapers</span>
             <div class='header-right'>
-                <button onClick={() => setWallpaper(false, true)}>
+                <button
+                    onClick={() => setWallpaper(false, true)}
+                    title='Select a random wallpaper'
+                >
                     <RandomIcon />
                 </button>
-                <button onClick={restoreWallpapers}>
+                <button
+                    onClick={restoreWallpapers}
+                    title='Restore active wallpapers'
+                >
                     <RestoreIcon />
                 </button>
-                <button disabled={!scanButtonActive()} onClick={scanAll}>
+                <button
+                    disabled={!scanButtonActive()}
+                    onClick={scanAll}
+                    title='Scan all sources'
+                >
                     <ScanIcon />
                 </button>
-                <button onClick={() => showSettings.set(true)}>
+                <button
+                    onClick={() => showSettings.set(true)}
+                    title='Open settings menu'
+                >
                     <SettingsIcon />
                 </button>
-                <button onClick={() => setWallpaper(false, false)}>
+                <button
+                    onClick={() => setWallpaper(false, false)}
+                    title='Save selected wallpaper'
+                >
                     <SaveIcon />
                 </button>
             </div>

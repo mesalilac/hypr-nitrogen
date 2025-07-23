@@ -67,7 +67,7 @@ export function WallpaperSource(props: Props) {
                 onChange={(e) => handleCheckboxChange(e.currentTarget.checked)}
             />
             <span>{props.path}</span>
-            <button onClick={handleSourceRemove}>
+            <button onClick={handleSourceRemove} title='Remove source'>
                 <RemoveIcon />
             </button>
         </div>
