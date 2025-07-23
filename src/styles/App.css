@@ -53,12 +53,13 @@
 
 .thumbnails-list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, 400px);
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
 }
 
 .thumbnail {
-    width: 100%;
+    width: 400px;
     height: auto;
     border-radius: 1rem;
     object-fit: cover;
