@@ -31,6 +31,12 @@ export function WallpaperSource(props: Props) {
                         props.setWallpapers(res.data);
                     })
                     .catch((e) => toast.error(e));
+                ipc.get
+                    .wallpaper_sources()
+                    .then((res) => {
+                        props.wallpaperSources.set(res.data);
+                    })
+                    .catch((e) => toast.error(e));
             })
             .catch((e) => toast.error(e));
     }
