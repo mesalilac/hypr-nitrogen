@@ -1,3 +1,7 @@
+## Preview
+
+[preview image](./preview.png)
+
 ## Dependencies
 
 - [hyprctl](https://github.com/hyprwm/Hyprland)
