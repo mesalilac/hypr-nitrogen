@@ -1,6 +1,6 @@
 ## Preview
 
-[preview image](./preview.png)
+![preview image](./preview.png)
 
 ## Dependencies
 
