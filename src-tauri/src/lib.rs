@@ -65,6 +65,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             ipc::cmd_set_wallpaper,
             ipc::cmd_add_wallpaper_source,
+            ipc::cmd_update_wallpaper_favorite,
             ipc::cmd_update_wallpaper_source_active,
             ipc::cmd_get_screens,
             ipc::cmd_get_wallpaper_sources,

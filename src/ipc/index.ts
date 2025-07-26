@@ -52,6 +52,12 @@ export const update = {
     }): Promise<types.Response<types.WallpaperSource>> {
         return invoke('cmd_update_wallpaper_source_active', props);
     },
+    wallpaper_favorite(props: {
+        id: string;
+        newValue: boolean;
+    }): Promise<types.Response<types.Wallpaper>> {
+        return invoke('cmd_update_wallpaper_favorite', props);
+    },
 };
 
 export const util = {

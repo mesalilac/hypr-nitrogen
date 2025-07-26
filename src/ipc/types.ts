@@ -14,6 +14,7 @@ export interface WallpaperSource {
 
 export interface Wallpaper {
     id: string;
+    is_favorite: boolean;
     signature: string;
     path: string;
     thumbnail_path: string;
