@@ -33,6 +33,7 @@ pub struct WallpaperSource {
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Wallpaper {
     pub id: String,
+    pub is_favorite: bool,
     pub signature: String,
     pub path: String,
     pub thumbnail_path: String,
@@ -81,6 +82,7 @@ impl NewWallpaperSource {
 #[diesel(table_name = schema::wallpapers)]
 pub struct NewWallpaper {
     pub id: String,
+    pub is_favorite: bool,
     pub signature: String,
     pub path: String,
     pub thumbnail_path: String,
@@ -100,6 +102,7 @@ impl NewWallpaper {
     ) -> Self {
         Self {
             id: nanoid!(),
+            is_favorite: false,
             signature,
             path,
             thumbnail_path,

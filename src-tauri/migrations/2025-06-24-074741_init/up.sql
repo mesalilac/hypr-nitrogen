@@ -7,6 +7,7 @@ CREATE TABLE wallpaper_sources (
 
 CREATE TABLE wallpapers (
     id TEXT NOT NULL PRIMARY KEY,       -- wallpaper ID (nanoid)
+    is_favorite BOOLEAN NOT NULL DEFAULT FALSE,
     signature TEXT NOT NULL UNIQUE,     -- signature (blake3 hash)
     path TEXT NOT NULL,                 -- path to image file
     thumbnail_path TEXT NOT NULL,       -- path to thumbnail file

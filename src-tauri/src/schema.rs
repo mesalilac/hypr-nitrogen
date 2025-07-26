@@ -19,6 +19,7 @@ diesel::table! {
 diesel::table! {
     wallpapers (id) {
         id -> Text,
+        is_favorite -> Bool,
         signature -> Text,
         path -> Text,
         thumbnail_path -> Text,
