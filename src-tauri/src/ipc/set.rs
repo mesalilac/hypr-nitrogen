@@ -151,3 +151,24 @@ pub async fn cmd_update_wallpaper_source_active(
         Err(e) => Err(e.to_string()),
     }
 }
+
+#[tauri::command]
+pub async fn cmd_update_wallpaper_favorite(
+    state: State<'_, DbPoolWrapper>,
+    id: String,
+    value: bool,
+) -> Result<Response<Wallpaper>, String> {
+    let mut conn = match state.pool.get() {
+        Ok(conn) => conn,
+        Err(e) => return Err(e.to_string()),
+    };
+
+    match diesel::update(schema::wallpapers::table)
+        .filter(schema::wallpapers::id.eq(&id))
+        .set(schema::wallpapers::dsl::is_favorite.eq(value))
+        .get_result(&mut conn)
+    {
+        Ok(v) => Ok(Response::new(v)),
+        Err(e) => Err(e.to_string()),
+    }
+}
