@@ -2,8 +2,10 @@ import fallbackImage from '@assets/fallback-image.svg';
 import * as ipc from '@ipc';
 import { createVisibilityObserver } from '@solid-primitives/intersection-observer';
 import { convertFileSrc } from '@tauri-apps/api/core';
-import { createSignal } from 'solid-js';
+import { createSignal, Match, Switch } from 'solid-js';
 import toast from 'solid-toast';
+import { FullHeartIcon } from '@/icons/full_heart';
+import { HeartIcon } from '@/icons/heart';
 
 interface Props {
     wallpaper: ipc.types.Wallpaper;
@@ -49,7 +51,14 @@ export function Thumbnail(props: Props) {
                 title={props.wallpaper.keywords}
             />
             <button class='thumbnail-favorite' onClick={handleFavoriteClick}>
-                {favorite() ? 'Unfavorite' : 'Favorite'}
+                <Switch>
+                    <Match when={favorite()}>
+                        <FullHeartIcon />
+                    </Match>
+                    <Match when={!favorite()}>
+                        <HeartIcon />
+                    </Match>
+                </Switch>
             </button>
         </div>
     );
