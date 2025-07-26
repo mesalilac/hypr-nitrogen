@@ -69,11 +69,9 @@ fn generate_signature(path: &Path) -> Option<String> {
 }
 
 fn keywords_from_file_name(file_name: &OsStr) -> String {
-    let lossy_string = file_name.to_string_lossy();
+    let string = file_name.to_string_lossy();
 
-    let parts: Vec<&str> = lossy_string.split('_').collect();
-
-    parts.join(" ")
+    string.replace("_", " ").replace("-", " ")
 }
 
 fn create_thumbnail_path(signature: &str) -> String {
