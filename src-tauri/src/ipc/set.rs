@@ -156,7 +156,7 @@ pub async fn cmd_update_wallpaper_source_active(
 pub async fn cmd_update_wallpaper_favorite(
     state: State<'_, DbPoolWrapper>,
     id: String,
-    value: bool,
+    new_value: bool,
 ) -> Result<Response<Wallpaper>, String> {
     let mut conn = match state.pool.get() {
         Ok(conn) => conn,
@@ -165,7 +165,7 @@ pub async fn cmd_update_wallpaper_favorite(
 
     match diesel::update(schema::wallpapers::table)
         .filter(schema::wallpapers::id.eq(&id))
-        .set(schema::wallpapers::dsl::is_favorite.eq(value))
+        .set(schema::wallpapers::dsl::is_favorite.eq(new_value))
         .get_result(&mut conn)
     {
         Ok(v) => Ok(Response::new(v)),
