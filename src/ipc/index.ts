@@ -1,7 +1,13 @@
 import { invoke } from '@tauri-apps/api/core';
+import toast from 'solid-toast';
 import * as types from './types.ts';
 
 export { types };
+
+export function handleError(err: string) {
+    console.error(err);
+    toast.error(err);
+}
 
 export const set = {
     wallpaper(props: {
