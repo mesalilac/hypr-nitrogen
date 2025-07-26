@@ -1,11 +1,10 @@
 import fallbackImage from '@assets/fallback-image.svg';
+import { FullHeartIcon, HeartIcon } from '@icons';
 import * as ipc from '@ipc';
 import { createVisibilityObserver } from '@solid-primitives/intersection-observer';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { createSignal, Match, Switch } from 'solid-js';
 import toast from 'solid-toast';
-import { FullHeartIcon } from '@/icons/full_heart';
-import { HeartIcon } from '@/icons/heart';
 
 interface Props {
     wallpaper: ipc.types.Wallpaper;

@@ -1,4 +1,6 @@
 export * from './add';
+export * from './full_heart';
+export * from './heart';
 export * from './random';
 export * from './remove';
 export * from './restore';
