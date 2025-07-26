@@ -54,7 +54,7 @@ export const update = {
     },
     wallpaper_favorite(props: {
         id: string;
-        new_value: boolean;
+        newValue: boolean;
     }): Promise<types.Response<types.Wallpaper>> {
         return invoke('cmd_update_wallpaper_favorite', props);
     },
