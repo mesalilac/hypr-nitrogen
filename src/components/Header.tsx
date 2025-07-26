@@ -34,13 +34,9 @@ export function Header() {
         300,
     );
 
-    onMount(() => {
-        ipc.get
-            .screens()
-            .then((res) => {
-                setScreens(res.data);
-            })
-            .catch((e) => toast.error(e));
+    onMount(async () => {
+        const screensRes = await ipc.get.screens().catch(ipc.handleError);
+        if (screensRes) setScreens(screensRes.data);
     });
 
     onCleanup(() => {
