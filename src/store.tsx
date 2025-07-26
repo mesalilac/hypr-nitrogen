@@ -34,14 +34,21 @@ export function GlobalContextProvider(props: { children: JSXElement }) {
 
     const filteredItems = createMemo(() => {
         const query = debouncedSearchQuery.get().toLowerCase();
+        const sortedList = wallpapers
+            .get()
+            .sort((a: ipc.types.Wallpaper, b: ipc.types.Wallpaper) => {
+                if (a.is_favorite && !b.is_favorite) return -1;
+                if (!a.is_favorite && b.is_favorite) return 1;
+                return 0;
+            });
 
         if (!query) {
-            return wallpapers.get();
+            return sortedList;
         }
 
-        return wallpapers
-            .get()
-            .filter((item) => item.keywords.toLowerCase().includes(query));
+        return sortedList.filter((item) =>
+            item.keywords.toLowerCase().includes(query),
+        );
     });
 
     return (
