@@ -27,6 +27,9 @@ export function ThumbnailsList() {
     });
 
     async function handleThumbnailClick(id: string) {
+        const lastActiveWallpaper = selectedWallpaper.get();
+        selectedWallpaper.set(id);
+
         // set temporary wallpaper
         const setWallpaperRes = await ipc.set
             .wallpaper({
@@ -37,9 +40,10 @@ export function ThumbnailsList() {
             })
             .catch(ipc.handleError);
 
-        if (!setWallpaperRes) return;
-
-        selectedWallpaper.set(id);
+        if (!setWallpaperRes) {
+            selectedWallpaper.set(lastActiveWallpaper);
+            return;
+        }
 
         const activewallpapersRes = await ipc.get
             .active_wallpapers()
