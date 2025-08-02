@@ -13,6 +13,7 @@ provides=('hypr-nitrogen-git')
 conflicts=('hypr-nitrogen' 'hypr-nitrogen-git')
 source=("git+${url}.git")
 sha256sums=('SKIP')
+opions=('!debug')
 
 prepare() {
   cd ${projectname}
