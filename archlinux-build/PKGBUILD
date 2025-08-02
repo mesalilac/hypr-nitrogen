@@ -26,7 +26,5 @@ build() {
 
 package() {
   cd ${projectname}
-  pwd
-  ls
   cp -a src-tauri/target/release/bundle/deb/${projectname}_${pkgver}_*/data/* "${pkgdir}"
 }
