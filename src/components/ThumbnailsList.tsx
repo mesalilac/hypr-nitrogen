@@ -25,32 +25,26 @@ export function ThumbnailsList() {
         if (activewallpapersRes) activeWallpapers.set(activewallpapersRes.data);
     });
 
-    function handleThumbnailClick(id: string) {
-        selectedWallpaper.set(id);
-
+    async function handleThumbnailClick(id: string) {
         // set temporary wallpaper
-        toast
-            .promise(
-                ipc.set.wallpaper({
-                    screen: selectedScreen.get(),
-                    wallpaperId: selectedWallpaper.get(),
-                    mode: selectedMode.get(),
-                    isTemporary: true,
-                }),
-                {
-                    loading: 'Setting wallpaper...',
-                    success: 'Wallpaper set',
-                    error: 'Failed to set wallpaper',
-                },
-            )
-            .then(async () => {
-                const activewallpapersRes = await ipc.get
-                    .active_wallpapers()
-                    .catch(ipc.handleError);
-                if (activewallpapersRes)
-                    activeWallpapers.set(activewallpapersRes.data);
+        const setWallpaperRes = await ipc.set
+            .wallpaper({
+                screen: selectedScreen.get(),
+                wallpaperId: selectedWallpaper.get(),
+                mode: selectedMode.get(),
+                isTemporary: true,
             })
             .catch(ipc.handleError);
+
+        if (setWallpaperRes) {
+            selectedWallpaper.set(id);
+
+            const activewallpapersRes = await ipc.get
+                .active_wallpapers()
+                .catch(ipc.handleError);
+            if (activewallpapersRes)
+                activeWallpapers.set(activewallpapersRes.data);
+        }
     }
 
     return (

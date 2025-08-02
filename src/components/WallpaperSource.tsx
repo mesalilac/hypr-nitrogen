@@ -17,26 +17,27 @@ export function WallpaperSource(props: Props) {
     const [active, setActive] = createSignal(props.active);
     const { wallpapers } = useGlobalContext();
 
-    function handleCheckboxChange(v: boolean) {
+    async function handleCheckboxChange(v: boolean) {
         setActive(v);
-        ipc.update
+        const updateWallpaperSourceActiveRes = await ipc.update
             .wallpaper_source_active({ id: props.id, active: active() })
-            .then(async (res) => {
-                toast.success(
-                    `Source is now ${res.data.active ? 'active' : 'inactive'}`,
-                );
-                const wallpapersRes = await ipc.get
-                    .wallpapers()
-                    .catch(ipc.handleError);
-                if (wallpapersRes) props.setWallpapers(wallpapersRes.data);
+            .catch(ipc.handleError);
 
-                const wallpaperSources = await ipc.get
-                    .wallpaper_sources()
-                    .catch(ipc.handleError);
-                if (wallpaperSources)
-                    props.wallpaperSources.set(wallpaperSources.data);
-            })
-            .catch((e) => toast.error(e));
+        if (updateWallpaperSourceActiveRes) {
+            toast.success(
+                `Source is now ${updateWallpaperSourceActiveRes.data.active ? 'active' : 'inactive'}`,
+            );
+            const wallpapersRes = await ipc.get
+                .wallpapers()
+                .catch(ipc.handleError);
+            if (wallpapersRes) props.setWallpapers(wallpapersRes.data);
+
+            const wallpaperSources = await ipc.get
+                .wallpaper_sources()
+                .catch(ipc.handleError);
+            if (wallpaperSources)
+                props.wallpaperSources.set(wallpaperSources.data);
+        }
     }
 
     async function handleSourceRemove() {

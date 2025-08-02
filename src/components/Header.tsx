@@ -43,38 +43,35 @@ export function Header() {
         debouncedPerformSearch.clear();
     });
 
-    function setWallpaper(isTemporary: boolean, random_wallpaper: boolean) {
+    async function setWallpaper(
+        isTemporary: boolean,
+        random_wallpaper: boolean,
+    ) {
         const selected_wallpaper = selectedWallpaper.get();
 
         if (
             (selected_wallpaper && selected_wallpaper !== undefined) ||
             random_wallpaper
         ) {
-            toast
-                .promise(
-                    ipc.set.wallpaper({
-                        screen: selectedScreen.get(),
-                        wallpaperId: random_wallpaper
-                            ? undefined
-                            : selected_wallpaper,
-                        mode: selectedMode.get(),
-                        isTemporary: isTemporary,
-                    }),
-                    {
-                        loading: 'Setting wallpaper...',
-                        success: 'Wallpaper set',
-                        error: 'Failed to set wallpaper',
-                    },
-                )
-                .then(async () => {
-                    const activeWallpapersRes = await ipc.get
-                        .active_wallpapers()
-                        .catch(ipc.handleError);
-
-                    if (activeWallpapersRes)
-                        activeWallpapers.set(activeWallpapersRes.data);
+            const setWallpaperRes = await ipc.set
+                .wallpaper({
+                    screen: selectedScreen.get(),
+                    wallpaperId: random_wallpaper
+                        ? undefined
+                        : selected_wallpaper,
+                    mode: selectedMode.get(),
+                    isTemporary: isTemporary,
                 })
-                .catch((e) => toast.error(e));
+                .catch(ipc.handleError);
+
+            if (setWallpaperRes) {
+                const activeWallpapersRes = await ipc.get
+                    .active_wallpapers()
+                    .catch(ipc.handleError);
+
+                if (activeWallpapersRes)
+                    activeWallpapers.set(activeWallpapersRes.data);
+            }
         }
     }
 
@@ -85,14 +82,12 @@ export function Header() {
         debouncedPerformSearch(value);
     }
 
-    function restoreWallpapers() {
-        toast
-            .promise(ipc.util.restore_wallpapers(), {
-                loading: 'Restoring wallpapers...',
-                success: 'Wallpapers restored',
-                error: 'Failed to restore wallpapers',
-            })
-            .catch((e) => toast.error(e));
+    async function restoreWallpapers() {
+        const restoreWallpapersRes = await ipc.util
+            .restore_wallpapers()
+            .catch(ipc.handleError);
+
+        if (restoreWallpapersRes) toast.success(`Restored wallpapers`);
     }
 
     function scanAll() {
@@ -106,7 +101,7 @@ export function Header() {
             .then((res) => {
                 wallpapers.set(res.data);
             })
-            .catch((e) => toast.error(e))
+            .catch(ipc.handleError)
             .finally(() => setScanButtonActive(true));
     }
 

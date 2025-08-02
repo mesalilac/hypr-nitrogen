@@ -27,34 +27,40 @@ export function Settings() {
         });
 
         if (directory) {
-            toast
+            const addWallpaperSourceRes = await toast
                 .promise(ipc.add.wallpaper_source({ path: directory }), {
                     loading: 'Adding new source...',
                     success: 'Source added',
                     error: 'Failed to add source',
                 })
-                .then((res) => {
-                    wallpaperSources.set([
-                        ...wallpaperSources.get(),
-                        res.data!,
+                .catch(ipc.handleError);
+
+            if (addWallpaperSourceRes) {
+                wallpaperSources.set([
+                    ...wallpaperSources.get(),
+                    addWallpaperSourceRes.data!,
+                ]);
+
+                const utilScanSource = await toast
+                    .promise(
+                        ipc.util.scan_source({
+                            sourceId: addWallpaperSourceRes.data.id,
+                        }),
+                        {
+                            loading: 'Scanning...',
+                            success: 'Scan complete',
+                            error: 'Scan failed',
+                        },
+                    )
+                    .catch(ipc.handleError);
+
+                if (utilScanSource) {
+                    wallpapers.set([
+                        ...wallpapers.get(),
+                        ...utilScanSource.data,
                     ]);
-                    toast
-                        .promise(
-                            ipc.util.scan_source({ sourceId: res.data.id }),
-                            {
-                                loading: 'Scanning...',
-                                success: 'Scan complete',
-                                error: 'Scan failed',
-                            },
-                        )
-                        .then((res2) => {
-                            wallpapers.set([...wallpapers.get(), ...res2.data]);
-                        })
-                        .catch((e) => toast.error(e));
-                })
-                .catch((e) => {
-                    toast.error(e);
-                });
+                }
+            }
         }
     }
 
