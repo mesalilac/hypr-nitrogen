@@ -10,7 +10,7 @@
         "serve": "vite preview",
         "tauri": "tauri"
     },
-    "license": "MIT",
+    "license": "GPLv3",
     "dependencies": {
         "@solid-primitives/intersection-observer": "^2.2.2",
         "@solid-primitives/scheduled": "^1.5.1",
