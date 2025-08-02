@@ -16,18 +16,13 @@ export function ThumbnailsList() {
     } = useGlobalContext();
 
     onMount(async () => {
-        ipc.get
-            .wallpapers()
-            .then((res) => {
-                wallpapers.set(res.data);
-            })
-            .catch((e) => toast.error(e));
-        ipc.get
+        const wallpapersRes = await ipc.get.wallpapers().catch(ipc.handleError);
+        if (wallpapersRes) wallpapers.set(wallpapersRes.data);
+
+        const activewallpapersRes = await ipc.get
             .active_wallpapers()
-            .then((res) => {
-                activeWallpapers.set(res.data);
-            })
-            .catch((e) => toast.error(e));
+            .catch(ipc.handleError);
+        if (activewallpapersRes) activeWallpapers.set(activewallpapersRes.data);
     });
 
     function handleThumbnailClick(id: string) {
@@ -48,15 +43,14 @@ export function ThumbnailsList() {
                     error: 'Failed to set wallpaper',
                 },
             )
-            .then(() => {
-                ipc.get
+            .then(async () => {
+                const activewallpapersRes = await ipc.get
                     .active_wallpapers()
-                    .then((res) => {
-                        activeWallpapers.set(res.data);
-                    })
-                    .catch((e) => toast.error(e));
+                    .catch(ipc.handleError);
+                if (activewallpapersRes)
+                    activeWallpapers.set(activewallpapersRes.data);
             })
-            .catch((e) => toast.error(e));
+            .catch(ipc.handleError);
     }
 
     return (

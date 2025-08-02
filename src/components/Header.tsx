@@ -66,13 +66,13 @@ export function Header() {
                         error: 'Failed to set wallpaper',
                     },
                 )
-                .then(() => {
-                    ipc.get
+                .then(async () => {
+                    const activeWallpapersRes = await ipc.get
                         .active_wallpapers()
-                        .then((res) => {
-                            activeWallpapers.set(res.data);
-                        })
-                        .catch((e) => toast.error(e));
+                        .catch(ipc.handleError);
+
+                    if (activeWallpapersRes)
+                        activeWallpapers.set(activeWallpapersRes.data);
                 })
                 .catch((e) => toast.error(e));
         }
