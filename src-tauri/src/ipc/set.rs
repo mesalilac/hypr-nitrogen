@@ -28,6 +28,10 @@ pub async fn cmd_set_wallpaper(
 
     let wallpaper: Option<Wallpaper> = match wallpaper_id {
         Some(id) => {
+            if id.is_empty() {
+                return Err(String::from("Invalid wallpaper id"));
+            }
+
             match schema::wallpapers::table
                 .filter(schema::wallpapers::id.eq(&id))
                 .get_result::<Wallpaper>(&mut conn)
