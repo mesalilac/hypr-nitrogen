@@ -4,7 +4,6 @@ import * as ipc from '@ipc';
 import { createVisibilityObserver } from '@solid-primitives/intersection-observer';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { createSignal, Match, Switch } from 'solid-js';
-import toast from 'solid-toast';
 
 interface Props {
     wallpaper: ipc.types.Wallpaper;
@@ -21,16 +20,16 @@ export function Thumbnail(props: Props) {
 
     const visible = useVisibilityObserver(() => imgRef);
 
-    function handleFavoriteClick() {
-        ipc.update
+    async function handleFavoriteClick() {
+        const wallpaperFavoriteRes = await ipc.update
             .wallpaper_favorite({
                 id: props.wallpaper.id,
                 newValue: !favorite(),
             })
-            .then((res) => {
-                setFavorite(res.data.is_favorite);
-            })
-            .catch((e) => toast.error(e));
+            .catch(ipc.handleError);
+
+        if (wallpaperFavoriteRes)
+            setFavorite(wallpaperFavoriteRes.data.is_favorite);
     }
 
     return (

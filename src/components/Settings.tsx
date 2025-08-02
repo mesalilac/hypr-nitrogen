@@ -13,13 +13,12 @@ export function Settings() {
         [],
     );
 
-    onMount(() => {
-        ipc.get
+    onMount(async () => {
+        const wallpaperSourcesRes = await ipc.get
             .wallpaper_sources()
-            .then((res) => {
-                wallpaperSources.set(res.data);
-            })
-            .catch((e) => toast.error(e));
+            .catch(ipc.handleError);
+
+        if (wallpaperSourcesRes) wallpaperSources.set(wallpaperSourcesRes.data);
     });
 
     async function addSource() {

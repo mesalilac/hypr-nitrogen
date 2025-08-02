@@ -34,13 +34,9 @@ export function Header() {
         300,
     );
 
-    onMount(() => {
-        ipc.get
-            .screens()
-            .then((res) => {
-                setScreens(res.data);
-            })
-            .catch((e) => toast.error(e));
+    onMount(async () => {
+        const screensRes = await ipc.get.screens().catch(ipc.handleError);
+        if (screensRes) setScreens(screensRes.data);
     });
 
     onCleanup(() => {
@@ -70,13 +66,13 @@ export function Header() {
                         error: 'Failed to set wallpaper',
                     },
                 )
-                .then(() => {
-                    ipc.get
+                .then(async () => {
+                    const activeWallpapersRes = await ipc.get
                         .active_wallpapers()
-                        .then((res) => {
-                            activeWallpapers.set(res.data);
-                        })
-                        .catch((e) => toast.error(e));
+                        .catch(ipc.handleError);
+
+                    if (activeWallpapersRes)
+                        activeWallpapers.set(activeWallpapersRes.data);
                 })
                 .catch((e) => toast.error(e));
         }
