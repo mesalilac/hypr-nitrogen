@@ -31,7 +31,7 @@ export function ThumbnailsList() {
         const setWallpaperRes = await ipc.set
             .wallpaper({
                 screen: selectedScreen.get(),
-                wallpaperId: selectedWallpaper.get(),
+                wallpaperId: id,
                 mode: selectedMode.get(),
                 isTemporary: true,
             })
