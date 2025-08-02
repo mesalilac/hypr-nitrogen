@@ -1,0 +1,32 @@
+# Maintainer:
+pkgname=hypr-nitrogen-git
+pkgver=0.1.0
+pkgrel=1
+projectname="hypr-nitrogen"
+pkgdesc="Wallpaper browser and setter for Hyprland"
+arch=('x86_64' 'aarch64')
+url="https://github.com/mesalilac/${projectname}"
+license=('MIT')
+depends=('cairo' 'desktop-file-utils' 'gdk-pixbuf2' 'glib2' 'gtk3' 'hicolor-icon-theme' 'libsoup' 'pango' 'webkit2gtk-4.1')
+makedepends=('git' 'openssl' 'appmenu-gtk-module' 'libappindicator-gtk3' 'librsvg' 'cargo' 'pnpm' 'nodejs')
+provides=('hypr-nitrogen-git')
+conflicts=('hypr-nitrogen' 'hypr-nitrogen-git')
+source=("git+${url}.git")
+sha256sums=('SKIP')
+
+prepare() {
+  cd ${projectname}
+  pnpm install
+}
+
+build() {
+  cd ${projectname}
+  pnpm tauri build -b deb
+}
+
+package() {
+  cd ${projectname}
+  pwd
+  ls
+  cp -a src-tauri/target/release/bundle/deb/${projectname}_${pkgver}_*/data/* "${pkgdir}"
+}

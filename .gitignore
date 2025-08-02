@@ -7,3 +7,5 @@ perf.data
 perf.data.old
 memory-profiling_hypr-nitrogen_*.dat
 
+archlinux-build/*
+!archlinux-build/PKGBUILD
