@@ -36,7 +36,9 @@ export function Header() {
 
     onMount(async () => {
         const screensRes = await ipc.get.screens().catch(ipc.handleError);
-        if (screensRes) setScreens(screensRes.data);
+        if (!screensRes) return;
+
+        setScreens(screensRes.data);
     });
 
     onCleanup(() => {
@@ -64,14 +66,15 @@ export function Header() {
                 })
                 .catch(ipc.handleError);
 
-            if (setWallpaperRes) {
-                const activeWallpapersRes = await ipc.get
-                    .active_wallpapers()
-                    .catch(ipc.handleError);
+            if (!setWallpaperRes) return;
 
-                if (activeWallpapersRes)
-                    activeWallpapers.set(activeWallpapersRes.data);
-            }
+            const activeWallpapersRes = await ipc.get
+                .active_wallpapers()
+                .catch(ipc.handleError);
+
+            if (!activeWallpapersRes) return;
+
+            activeWallpapers.set(activeWallpapersRes.data);
         }
     }
 
@@ -87,7 +90,9 @@ export function Header() {
             .restore_wallpapers()
             .catch(ipc.handleError);
 
-        if (restoreWallpapersRes) toast.success(`Restored wallpapers`);
+        if (!restoreWallpapersRes) return;
+
+        toast.success(`Restored wallpapers`);
     }
 
     function scanAll() {

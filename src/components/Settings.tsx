@@ -18,7 +18,9 @@ export function Settings() {
             .wallpaper_sources()
             .catch(ipc.handleError);
 
-        if (wallpaperSourcesRes) wallpaperSources.set(wallpaperSourcesRes.data);
+        if (!wallpaperSourcesRes) return;
+
+        wallpaperSources.set(wallpaperSourcesRes.data);
     });
 
     async function addSource() {
@@ -26,42 +28,39 @@ export function Settings() {
             directory: true,
         });
 
-        if (directory) {
-            const addWallpaperSourceRes = await toast
-                .promise(ipc.add.wallpaper_source({ path: directory }), {
-                    loading: 'Adding new source...',
-                    success: 'Source added',
-                    error: 'Failed to add source',
-                })
-                .catch(ipc.handleError);
+        if (!directory) return;
 
-            if (addWallpaperSourceRes) {
-                wallpaperSources.set([
-                    ...wallpaperSources.get(),
-                    addWallpaperSourceRes.data!,
-                ]);
+        const addWallpaperSourceRes = await toast
+            .promise(ipc.add.wallpaper_source({ path: directory }), {
+                loading: 'Adding new source...',
+                success: 'Source added',
+                error: 'Failed to add source',
+            })
+            .catch(ipc.handleError);
 
-                const utilScanSource = await toast
-                    .promise(
-                        ipc.util.scan_source({
-                            sourceId: addWallpaperSourceRes.data.id,
-                        }),
-                        {
-                            loading: 'Scanning...',
-                            success: 'Scan complete',
-                            error: 'Scan failed',
-                        },
-                    )
-                    .catch(ipc.handleError);
+        if (!addWallpaperSourceRes) return;
 
-                if (utilScanSource) {
-                    wallpapers.set([
-                        ...wallpapers.get(),
-                        ...utilScanSource.data,
-                    ]);
-                }
-            }
-        }
+        wallpaperSources.set([
+            ...wallpaperSources.get(),
+            addWallpaperSourceRes.data!,
+        ]);
+
+        const utilScanSource = await toast
+            .promise(
+                ipc.util.scan_source({
+                    sourceId: addWallpaperSourceRes.data.id,
+                }),
+                {
+                    loading: 'Scanning...',
+                    success: 'Scan complete',
+                    error: 'Scan failed',
+                },
+            )
+            .catch(ipc.handleError);
+
+        if (!utilScanSource) return;
+
+        wallpapers.set([...wallpapers.get(), ...utilScanSource.data]);
     }
 
     return (

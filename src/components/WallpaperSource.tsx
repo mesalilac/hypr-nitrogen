@@ -23,21 +23,22 @@ export function WallpaperSource(props: Props) {
             .wallpaper_source_active({ id: props.id, active: active() })
             .catch(ipc.handleError);
 
-        if (updateWallpaperSourceActiveRes) {
-            toast.success(
-                `Source is now ${updateWallpaperSourceActiveRes.data.active ? 'active' : 'inactive'}`,
-            );
-            const wallpapersRes = await ipc.get
-                .wallpapers()
-                .catch(ipc.handleError);
-            if (wallpapersRes) props.setWallpapers(wallpapersRes.data);
+        if (!updateWallpaperSourceActiveRes) return;
 
-            const wallpaperSources = await ipc.get
-                .wallpaper_sources()
-                .catch(ipc.handleError);
-            if (wallpaperSources)
-                props.wallpaperSources.set(wallpaperSources.data);
-        }
+        toast.success(
+            `Source is now ${updateWallpaperSourceActiveRes.data.active ? 'active' : 'inactive'}`,
+        );
+        const wallpapersRes = await ipc.get.wallpapers().catch(ipc.handleError);
+        if (!wallpapersRes) return;
+
+        props.setWallpapers(wallpapersRes.data);
+
+        const wallpaperSources = await ipc.get
+            .wallpaper_sources()
+            .catch(ipc.handleError);
+        if (!wallpaperSources) return;
+
+        props.wallpaperSources.set(wallpaperSources.data);
     }
 
     async function handleSourceRemove() {
@@ -45,22 +46,22 @@ export function WallpaperSource(props: Props) {
             .wallpaper_source({ id: props.id })
             .catch(ipc.handleError);
 
-        if (removeWallpaperSourceRes) {
-            props.wallpaperSources.set(
-                props.wallpaperSources
-                    .get()
-                    .filter((x) => x.id !== removeWallpaperSourceRes.data.id),
-            );
-            wallpapers.set(
-                wallpapers
-                    .get()
-                    .filter(
-                        (x) =>
-                            x.wallpaper_source_id !==
-                            removeWallpaperSourceRes.data.id,
-                    ),
-            );
-        }
+        if (!removeWallpaperSourceRes) return;
+
+        props.wallpaperSources.set(
+            props.wallpaperSources
+                .get()
+                .filter((x) => x.id !== removeWallpaperSourceRes.data.id),
+        );
+        wallpapers.set(
+            wallpapers
+                .get()
+                .filter(
+                    (x) =>
+                        x.wallpaper_source_id !==
+                        removeWallpaperSourceRes.data.id,
+                ),
+        );
     }
 
     return (

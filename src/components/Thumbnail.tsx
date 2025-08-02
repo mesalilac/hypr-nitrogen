@@ -28,8 +28,9 @@ export function Thumbnail(props: Props) {
             })
             .catch(ipc.handleError);
 
-        if (wallpaperFavoriteRes)
-            setFavorite(wallpaperFavoriteRes.data.is_favorite);
+        if (!wallpaperFavoriteRes) return;
+
+        setFavorite(wallpaperFavoriteRes.data.is_favorite);
     }
 
     return (

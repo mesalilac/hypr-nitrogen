@@ -21,7 +21,9 @@ export function ThumbnailsList() {
         const activewallpapersRes = await ipc.get
             .active_wallpapers()
             .catch(ipc.handleError);
-        if (activewallpapersRes) activeWallpapers.set(activewallpapersRes.data);
+        if (!activewallpapersRes) return;
+
+        activeWallpapers.set(activewallpapersRes.data);
     });
 
     async function handleThumbnailClick(id: string) {
@@ -35,15 +37,17 @@ export function ThumbnailsList() {
             })
             .catch(ipc.handleError);
 
-        if (setWallpaperRes) {
-            selectedWallpaper.set(id);
+        if (!setWallpaperRes) return;
 
-            const activewallpapersRes = await ipc.get
-                .active_wallpapers()
-                .catch(ipc.handleError);
-            if (activewallpapersRes)
-                activeWallpapers.set(activewallpapersRes.data);
-        }
+        selectedWallpaper.set(id);
+
+        const activewallpapersRes = await ipc.get
+            .active_wallpapers()
+            .catch(ipc.handleError);
+
+        if (!activewallpapersRes) return;
+
+        activeWallpapers.set(activewallpapersRes.data);
     }
 
     return (
