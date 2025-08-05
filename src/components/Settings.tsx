@@ -14,8 +14,8 @@ export function Settings() {
     );
 
     onMount(async () => {
-        const wallpaperSourcesRes = await ipc.get
-            .wallpaper_sources()
+        const wallpaperSourcesRes = await ipc.cmd
+            .get_wallpaper_sources()
             .catch(ipc.handleError);
 
         if (!wallpaperSourcesRes) return;
@@ -31,7 +31,7 @@ export function Settings() {
         if (!directory) return;
 
         const addWallpaperSourceRes = await toast
-            .promise(ipc.add.wallpaper_source({ path: directory }), {
+            .promise(ipc.cmd.add_wallpaper_source({ path: directory }), {
                 loading: 'Adding new source...',
                 success: 'Source added',
                 error: 'Failed to add source',
@@ -47,7 +47,7 @@ export function Settings() {
 
         const utilScanSource = await toast
             .promise(
-                ipc.util.scan_source({
+                ipc.cmd.scan_source({
                     sourceId: addWallpaperSourceRes.data.id,
                 }),
                 {

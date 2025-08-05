@@ -9,73 +9,44 @@ export function handleError(err: string) {
     toast.error(err);
 }
 
-export const set = {
-    wallpaper(props: {
+type CmdReturn<T> = Promise<types.Response<T>>;
+
+export const cmd = {
+    set_wallpaper: (args: {
         screen: string;
-        wallpaperId: string | undefined;
+        wallpaperId?: string;
         mode: types.Mode;
         isTemporary: boolean;
-    }): Promise<types.Response<types.Active>> {
-        return invoke('cmd_set_wallpaper', props);
-    },
-};
-
-export const add = {
-    wallpaper_source(props: {
+    }): CmdReturn<types.Active> => invoke('cmd_set_wallpaper', args),
+    add_wallpaper_source: (args: {
         path: string;
-    }): Promise<types.Response<types.WallpaperSource>> {
-        return invoke('cmd_add_wallpaper_source', props);
-    },
-};
-
-export const get = {
-    screens(): Promise<types.Response<string[]>> {
-        return invoke('cmd_get_screens');
-    },
-    wallpaper_sources(): Promise<types.Response<types.WallpaperSource[]>> {
-        return invoke('cmd_get_wallpaper_sources');
-    },
-    wallpapers(): Promise<types.Response<types.Wallpaper[]>> {
-        return invoke('cmd_get_wallpapers');
-    },
-    active_wallpapers(): Promise<types.Response<types.Active[]>> {
-        return invoke('cmd_get_active_wallpapers');
-    },
-};
-
-export const remove = {
-    wallpaper_source(props: {
+    }): CmdReturn<types.WallpaperSource> =>
+        invoke('cmd_add_wallpaper_source', args),
+    get_screens: (): CmdReturn<string[]> => invoke('cmd_get_screens'),
+    get_wallpaper_sources: (): CmdReturn<types.WallpaperSource[]> =>
+        invoke('cmd_get_wallpaper_sources'),
+    get_wallpapers: (): CmdReturn<types.Wallpaper[]> =>
+        invoke('cmd_get_wallpapers'),
+    get_active_wallpapers: (): CmdReturn<types.Active[]> =>
+        invoke('cmd_get_active_wallpapers'),
+    remove_wallpaper_source: (args: {
         id: string;
-    }): Promise<types.Response<types.WallpaperSource>> {
-        return invoke('cmd_remove_wallpaper_source', props);
-    },
-};
-
-export const update = {
-    wallpaper_source_active(props: {
+    }): CmdReturn<types.WallpaperSource> =>
+        invoke('cmd_remove_wallpaper_source', args),
+    update_wallpaper_source_active: (args: {
         id: string;
         active: boolean;
-    }): Promise<types.Response<types.WallpaperSource>> {
-        return invoke('cmd_update_wallpaper_source_active', props);
-    },
-    wallpaper_favorite(props: {
+    }): CmdReturn<types.WallpaperSource> =>
+        invoke('cmd_update_wallpaper_source_active', args),
+    update_wallpaper_favorite: (args: {
         id: string;
         newValue: boolean;
-    }): Promise<types.Response<types.Wallpaper>> {
-        return invoke('cmd_update_wallpaper_favorite', props);
-    },
-};
-
-export const util = {
-    scan_source(props: {
-        sourceId: string;
-    }): Promise<types.Response<types.Wallpaper[]>> {
-        return invoke('cmd_scan_source', props);
-    },
-    scan_all_sources(): Promise<types.Response<types.Wallpaper[]>> {
-        return invoke('cmd_scan_all_sources');
-    },
-    restore_wallpapers(): Promise<types.Response<boolean>> {
-        return invoke('cmd_restore_wallpapers');
-    },
+    }): CmdReturn<types.Wallpaper> =>
+        invoke('cmd_update_wallpaper_favorite', args),
+    scan_source: (args: { sourceId: string }): CmdReturn<types.Wallpaper[]> =>
+        invoke('cmd_scan_source', args),
+    scan_all_sources: (): CmdReturn<types.Wallpaper[]> =>
+        invoke('cmd_scan_all_sources'),
+    restore_wallpapers: (): CmdReturn<boolean> =>
+        invoke('cmd_restore_wallpapers'),
 };

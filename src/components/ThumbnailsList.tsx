@@ -15,11 +15,13 @@ export function ThumbnailsList() {
     } = useGlobalContext();
 
     onMount(async () => {
-        const wallpapersRes = await ipc.get.wallpapers().catch(ipc.handleError);
+        const wallpapersRes = await ipc.cmd
+            .get_wallpapers()
+            .catch(ipc.handleError);
         if (wallpapersRes) wallpapers.set(wallpapersRes.data);
 
-        const activewallpapersRes = await ipc.get
-            .active_wallpapers()
+        const activewallpapersRes = await ipc.cmd
+            .get_active_wallpapers()
             .catch(ipc.handleError);
         if (!activewallpapersRes) return;
 
@@ -31,8 +33,8 @@ export function ThumbnailsList() {
         selectedWallpaper.set(id);
 
         // set temporary wallpaper
-        const setWallpaperRes = await ipc.set
-            .wallpaper({
+        const setWallpaperRes = await ipc.cmd
+            .set_wallpaper({
                 screen: selectedScreen.get(),
                 wallpaperId: id,
                 mode: selectedMode.get(),
@@ -45,8 +47,8 @@ export function ThumbnailsList() {
             return;
         }
 
-        const activewallpapersRes = await ipc.get
-            .active_wallpapers()
+        const activewallpapersRes = await ipc.cmd
+            .get_active_wallpapers()
             .catch(ipc.handleError);
 
         if (!activewallpapersRes) return;

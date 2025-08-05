@@ -19,8 +19,8 @@ export function WallpaperSource(props: Props) {
 
     async function handleCheckboxChange(v: boolean) {
         setActive(v);
-        const updateWallpaperSourceActiveRes = await ipc.update
-            .wallpaper_source_active({ id: props.id, active: active() })
+        const updateWallpaperSourceActiveRes = await ipc.cmd
+            .update_wallpaper_source_active({ id: props.id, active: active() })
             .catch(ipc.handleError);
 
         if (!updateWallpaperSourceActiveRes) return;
@@ -28,13 +28,15 @@ export function WallpaperSource(props: Props) {
         toast.success(
             `Source is now ${updateWallpaperSourceActiveRes.data.active ? 'active' : 'inactive'}`,
         );
-        const wallpapersRes = await ipc.get.wallpapers().catch(ipc.handleError);
+        const wallpapersRes = await ipc.cmd
+            .get_wallpapers()
+            .catch(ipc.handleError);
         if (!wallpapersRes) return;
 
         props.setWallpapers(wallpapersRes.data);
 
-        const wallpaperSources = await ipc.get
-            .wallpaper_sources()
+        const wallpaperSources = await ipc.cmd
+            .get_wallpaper_sources()
             .catch(ipc.handleError);
         if (!wallpaperSources) return;
 
@@ -42,8 +44,8 @@ export function WallpaperSource(props: Props) {
     }
 
     async function handleSourceRemove() {
-        const removeWallpaperSourceRes = await ipc.remove
-            .wallpaper_source({ id: props.id })
+        const removeWallpaperSourceRes = await ipc.cmd
+            .remove_wallpaper_source({ id: props.id })
             .catch(ipc.handleError);
 
         if (!removeWallpaperSourceRes) return;
