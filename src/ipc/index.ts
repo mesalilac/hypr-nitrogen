@@ -8,6 +8,7 @@ export function handleError(err: string) {
     console.error(err);
     toast.error(err);
 }
+
 type CmdReturn<T> = Promise<types.Response<T>>;
 
 export const cmd = {
