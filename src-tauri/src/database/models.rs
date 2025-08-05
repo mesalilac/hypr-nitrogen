@@ -5,8 +5,10 @@ use crate::schema;
 use diesel::prelude::*;
 use nanoid::nanoid;
 use serde::Serialize;
+use ts_rs::TS;
 
-#[derive(Queryable, Debug, Associations, Identifiable, Serialize, Clone)]
+#[derive(TS, Queryable, Debug, Associations, Identifiable, Serialize, Clone)]
+#[ts(export)]
 #[diesel(primary_key(screen))]
 #[diesel(table_name = schema::active)]
 #[diesel(belongs_to(Wallpaper, foreign_key = wallpaper_id))]
@@ -17,7 +19,8 @@ pub struct Active {
     pub mode: String,
 }
 
-#[derive(Queryable, Identifiable, Debug, Serialize, Clone)]
+#[derive(TS, Queryable, Identifiable, Debug, Serialize, Clone)]
+#[ts(export)]
 #[diesel(table_name = schema::wallpaper_sources)]
 #[diesel(primary_key(id))]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
@@ -27,7 +30,8 @@ pub struct WallpaperSource {
     pub active: bool,
 }
 
-#[derive(Queryable, Identifiable, Associations, Debug, Serialize, Clone)]
+#[derive(TS, Queryable, Identifiable, Associations, Debug, Serialize, Clone)]
+#[ts(export)]
 #[diesel(table_name = schema::wallpapers)]
 #[diesel(belongs_to(WallpaperSource, foreign_key = wallpaper_source_id))]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
