@@ -35,7 +35,7 @@ export function Header() {
     );
 
     onMount(async () => {
-        const screensRes = await ipc.get.screens().catch(ipc.handleError);
+        const screensRes = await ipc.cmd.get_screens().catch(ipc.handleError);
         if (!screensRes) return;
 
         setScreens(screensRes.data);
@@ -55,8 +55,8 @@ export function Header() {
             (selected_wallpaper && selected_wallpaper !== undefined) ||
             random_wallpaper
         ) {
-            const setWallpaperRes = await ipc.set
-                .wallpaper({
+            const setWallpaperRes = await ipc.cmd
+                .set_wallpaper({
                     screen: selectedScreen.get(),
                     wallpaperId: random_wallpaper
                         ? undefined
@@ -68,8 +68,8 @@ export function Header() {
 
             if (!setWallpaperRes) return;
 
-            const activeWallpapersRes = await ipc.get
-                .active_wallpapers()
+            const activeWallpapersRes = await ipc.cmd
+                .get_active_wallpapers()
                 .catch(ipc.handleError);
 
             if (!activeWallpapersRes) return;
@@ -86,7 +86,7 @@ export function Header() {
     }
 
     async function restoreWallpapers() {
-        const restoreWallpapersRes = await ipc.util
+        const restoreWallpapersRes = await ipc.cmd
             .restore_wallpapers()
             .catch(ipc.handleError);
 
@@ -98,7 +98,7 @@ export function Header() {
     function scanAll() {
         setScanButtonActive(false);
         toast
-            .promise(ipc.util.scan_all_sources(), {
+            .promise(ipc.cmd.scan_all_sources(), {
                 loading: 'Scanning all sources...',
                 success: 'Scan complete',
                 error: 'Scan failed',

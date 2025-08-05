@@ -21,8 +21,8 @@ export function Thumbnail(props: Props) {
     const visible = useVisibilityObserver(() => imgRef);
 
     async function handleFavoriteClick() {
-        const wallpaperFavoriteRes = await ipc.update
-            .wallpaper_favorite({
+        const wallpaperFavoriteRes = await ipc.cmd
+            .update_wallpaper_favorite({
                 id: props.wallpaper.id,
                 newValue: !favorite(),
             })
